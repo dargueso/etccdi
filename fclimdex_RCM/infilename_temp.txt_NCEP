@@ -1,0 +1,2 @@
+  NSTD  BYear EYear PRCPNN         data names for Tmax, Tmin and PRCP              ! data names can be in any order
+   5    1961  1990   25        NCEP_TX_1948-2011.nc    NCEP_TN_1948-2011.nc   NCEP_PR_1948-2011.nc ! you can separate data names with blanks,

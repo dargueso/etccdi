@@ -1,0 +1,42 @@
+ &input
+OS='linux',
+! OS='windows',
+NoMissingThreshold=0.85,  ! suggested by Lisa
+ipt_dir='./',
+opt_dir='./index/',
+
+
+tmax_dir='/srv/ccrc/data03/z3356123/NCEP1/DATA_daily_Nov2011/'
+tmin_dir='/srv/ccrc/data03/z3356123/NCEP1/DATA_daily_Nov2011/'
+prcp_dir='/srv/ccrc/data03/z3356123/NCEP1/DATA_daily_Nov2011/'
+
+!save_thresholds=F,     ! DO NOT save the thresholds
+ save_thresholds= T,  ! Save the thresholds
+sub_folder=F,   ! put all indices in the same opt_dir
+! sub_folder=T,  ! put indices in different sub folders
+inf_file='infilename_temp.txt',
+log_file='1948-2011.log'     ! log file
+
+!RCMs
+is_rcm= .false.
+!name of the variables
+
+prec_name='pre'
+tmax_name='tmax'
+tmin_name='tmin'
+/
+
+!ipt_dir='c:\work\',
+!opt_dir='d:\data\index\',
+!data_dir='c:\work\',
+!para_file='para_temp.txt',
+
+
+! ipt_dir:  dir for the two input parameter files.
+! opt_dir:  dir for output of indices. 
+! data_dir: dir for station data.
+
+! *_dir can be absolute or relative directory.
+! OS can only be 'linux' or 'windows' now, will consider Mac or others later ...
+!
+! make sure these *_dir exist, otherwise it stops.

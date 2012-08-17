@@ -36,7 +36,7 @@ real,allocatable,dimension(:,:,:) :: GSLout
 !      real,allocatable :: indx_mon(:,:,:,:),indx_year(:,:,:)
 
 namelist /input/ ipt_dir,opt_dir,para_file,tmax_dir,tmin_dir,prcp_dir,inf_file,log_file,  &
-OS,save_thresholds,sub_folder,NoMissingThreshold,is_rcm,&
+OS,save_thresholds,sub_folder,NoMissingThreshold,is_rcm,is_thresfile,&
 prec_name,tmax_name,tmin_name, STDSPAN, BASESYEAR, BASEEYEAR, PRCPNN, Outname
 
 !$OMP parallel private(IDcpu);  IDcpu=omp_get_thread_num();   print*,'OpenMP ID #',IDcpu,'of ',omp_get_num_threads()
@@ -118,7 +118,7 @@ call Rnnmm(Rnmout(i,j,:,:))  ! R10mm, R20mm, Rnnmm, SDII (Annual)
 call RX5day(RXout(i,j,:,:,:)) ! Rx1day, Rx5day (13 months)
 call CDD(CDDout(i,j,:,:))    ! CDD, CWD (Annual)
 call R95p(R95pout(i,j,:,:))   ! R95p, R99p, PRCPtot (Annual)
-call TX10p(TX10Pout(i,j,:,:,:),wcsdi(i,j,:,:),thresout(i,j,:,:))   ! tn10p,tn50p,tn90p,tx10p,tx50p,tx90p (13 months); wsdi,csdi (Annual)
+call TX10p(TX10Pout(i,j,:,:,:),wcsdi(i,j,:,:),thresout(i,j,:,:),is_thresfile,i,j)   ! tn10p,tn50p,tn90p,tx10p,tx50p,tx90p (13 months); wsdi,csdi (Annual)
 78      continue
 enddo
 enddo

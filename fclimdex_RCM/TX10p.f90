@@ -1,10 +1,10 @@
-      subroutine TX10p(Tout,wcsdi,thresOut)  ! tn10out,tn50out,tn90out,tx10out,tx50out,tx90out (13 months); wsdi,csdi
+      subroutine TX10p(Tout,wcsdi,thresOut,is_thresfile,lon_i,lat_j)  ! tn10out,tn50out,tn90out,tx10out,tx50out,tx90out (13 months); wsdi,csdi
       use COMM
       use functions
-       character*80:: ofile
+       character*80:: ofile,file_thres
        integer:: year, month, day, kth, cnt, nn,  missxcnt, missncnt,	&
-             iter, cntx, cntn,i,byear,flgtn,flgtx,flg,j,ID, Ky !,idum
-
+             iter, cntx, cntn,i,byear,flgtn,flgtx,flg,j,ID, Ky, &!,idum
+			 ncid,lon_i,lat_j
        real::Tout(YRS,13,6),wcsdi(YRS,2)
        real,dimension(DoY,BYRS,BYRS-1) :: thresbx50,thresbn50,thresbn10,thresbn90,thresbx90,thresbx10
        real,dimension(DoY,3)           :: threstmp
@@ -18,6 +18,8 @@
        real :: BYRSm,rDoY,temp
 
        integer :: SmByear ! SYear-BaseYear
+
+	   logical::is_thresfile
 
       data rlevs/0.1,0.5,0.9/
 
@@ -64,6 +66,36 @@
             tndata(1:BYRS-1,1+DoY+SS:DoY+SS*2)=tndtmp(2:BYRS,1:SS)
             txdata(1:BYRS-1,1+DoY+SS:DoY+SS*2)=txdtmp(2:BYRS,1:SS)
 
+
+
+
+! Use an external file for thresholds or calculate them
+
+if (is_thresfile) then
+file_thres='thresholds.nc'
+call err_handle(nf90_open(file_thres,NF90_nowrite,ncid), 'open file')
+
+
+call err_handle(NF90_INQ_VARID (ncid, 'thresan10', ID_var),'inquire thresan10 var ID')
+call err_handle(NF90_get_var(ncid,ID_var,thresan10,start = (/ lon_i, lat_j, 1/),count = (/ 1, 1, DoY /),'get Var thresan10')
+
+call err_handle(NF90_INQ_VARID (ncid, 'thresan50', ID_var),'inquire thresan50 var ID')
+call err_handle(NF90_get_var(ncid,ID_var,thresan50,start = (/ lon_i, lat_j, 1/),count = (/ 1, 1, DoY /),'get Var thresan50')
+
+call err_handle(NF90_INQ_VARID (ncid, 'thresan90', ID_var),'inquire thresan90 var ID')
+call err_handle(NF90_get_var(ncid,ID_var,thresan90,start = (/ lon_i, lat_j, 1/),count = (/ 1, 1, DoY /),'get Var thresan90')
+
+
+call err_handle(NF90_INQ_VARID (ncid, 'thresax10', ID_var),'inquire thresax10 var ID')
+call err_handle(NF90_get_var(ncid,ID_var,thresax10,start = (/ lon_i, lat_j, 1/),count = (/ 1, 1, DoY /),'get Var thresax10')
+
+call err_handle(NF90_INQ_VARID (ncid, 'thresax50', ID_var),'inquire thresax50 var ID')
+call err_handle(NF90_get_var(ncid,ID_var,thresax50,start = (/ lon_i, lat_j, 1/),count = (/ 1, 1, DoY /),'get Var thresax50')
+
+call err_handle(NF90_INQ_VARID (ncid, 'thresax90', ID_var),'inquire thresax90 var ID')
+call err_handle(NF90_get_var(ncid,ID_var,thresax90,start = (/ lon_i, lat_j, 1/),count = (/
+
+else
       flgtn=0
       flgtx=0
 !      call threshold(tndata,.1,thresan10, flgtn)
@@ -101,6 +133,10 @@
 !        call threshold(txdata,.9,thresax90, flgtx)
 !        thresax90=thresax90+1e-5
       endif
+
+endif
+
+
 
      thresOut(:,1)=thresan10
      thresOut(:,2)=thresan50

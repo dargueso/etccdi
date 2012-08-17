@@ -29,10 +29,41 @@ begin
 
 	;---WRF DOMAINS
 
-	index="TR"
+	index="R20mm"
+	
+	if (index.eq."SU")then
+		definition="(Tmax>25~S~o~N~C)"
+	else
+		if (index.eq."TR")then
+			definition="(Tmin>20~S~o~N~C)"
+		else
+			if (index.eq."FD")then
+				definition="(Tmin<0~S~o~N~C)"
+			else
+				if (index.eq."ID")then
+					definition="(Tmax<0~S~o~N~C)"
+				else
+					if (index.eq."R10mm")then
+						definition=" "
+					else
+						if (index.eq."R20mm")then
+							definition=" "
+				
+				else
+					print("index not supported")
+					exit
+					
+					
+				end if
+			end if
+				end if
+			end if
+		end if
+	end if
+	
 	;pattern of the filenames
-	patt_pres="CCRC_NARCliM_Sydney_1989-2009_"
-	patt_fut="CCRC_NARCliM_Sydney_2039-2059_"
+	patt_pres="CCRC_NARCliM_Sydney_MK35_bc_1989-2009_"
+	patt_fut="CCRC_NARCliM_Sydney_MK35_bc_2039-2059_"
 
 	patt_imgout = "wrf2k_Sydney_ETCCDI_"
 	;---SETUP
@@ -91,7 +122,7 @@ begin
 	; 	;--READ ETCCDI FUTURE
 	; 	;#######################
 	; 
-	f2 = addfile(diri_pres+patt_pres+index+".nc","r")
+	f2 = addfile(diri_fut+patt_fut+index+".nc","r")
 
 	wrf_fut=f2->Annual
 	dsizes_f=dimsizes(wrf_fut)
@@ -120,7 +151,7 @@ begin
 	
 	wrfann_pres=mask(wrfann_pres,lud_wrf,1)
 	wrfann_fut=mask(wrfann_fut,lud_wrf,1)
-	limit_up=max((/max(wrfann_pres),max(wrfann_fut)/))
+	limit_up=ceil(max((/max(wrfann_pres),max(wrfann_fut)/))/5)*5
 
 
 	;calculate changes
@@ -240,17 +271,17 @@ begin
 	;***************************************
 	; create third individual plots
 	;***************************************
-
+	
 	res@cnMinLevelValF		= 0			;same manual levels
-	res@cnMaxLevelValF		= 20.0			;as other plots
-	res@cnLevelSpacingF	= 2			;
+	res@cnMaxLevelValF		= ceil(max(max(ind_changes))/5)*5			;as other plots
+	res@cnLevelSpacingF	= 2.5			;
 	plot2 = gsn_csm_contour_map(wks,ind_changes(:,:),res)
 
 
 	pres2                     = True
 	pres2@gsnPanelLabelBar    = True       ; common label bar
 	pres2@gsnFrame            = False      ; don't advance frame yet
-	pres2@lbLabelAutoStride   = True 
+	pres2@lbLabelStride   = 2 
 	pres2@lbTitleString	= wrf_pres@units
 	pres2@lbTitlePosition			= "Left"
 	pres2@lbTitleDirection		= "Across"
@@ -273,7 +304,7 @@ begin
 	txres               = True                     ; text mods desired
 	txres@txFontHeightF = 0.02                 ; font smaller. default big
 	txres@txJust = "topCenter" ;; justification of text coordinates
-	gsn_text_ndc(wks,"Changes in "+f@long_name+" (MK3.5)",0.45,0.8,txres)
+	gsn_text_ndc(wks,"Changes in "+f@long_name+" "+definition+" MK3.5",0.45,0.8,txres)
 	frame(wks)
 
 	; 

@@ -25,47 +25,241 @@ begin
 	load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 
 
-
+	syear=1990
+	eyear=2009
+	nyears=eyear-syear+1
 
 	;---WRF DOMAINS
 
-	index="R20mm"
+	index="Rx5day"
 	
-	if (index.eq."SU")then
-		definition="(Tmax>25~S~o~N~C)"
-	else
-		if (index.eq."TR")then
-			definition="(Tmin>20~S~o~N~C)"
-		else
-			if (index.eq."FD")then
-				definition="(Tmin<0~S~o~N~C)"
-			else
-				if (index.eq."ID")then
-					definition="(Tmax<0~S~o~N~C)"
-				else
-					if (index.eq."R10mm")then
-						definition=" "
-					else
-						if (index.eq."R20mm")then
-							definition=" "
-				
-				else
-					print("index not supported")
-					exit
-					
-					
-				end if
-			end if
-				end if
-			end if
-		end if
+	
+		limit_bot=0.
+		stride=2.
+		spacing_c=0.5
+		stride_c=2.	
+		spacing=5.
+		definition=" "
+
+	if (index.eq."TR") then
+		limit_up=60.
+		spacing=5
+		stride=2
+		spacing_c=2.5
+		stride_c=2
+		
+	definition="(Tmin>20~S~o~N~C)"
 	end if
 	
-	;pattern of the filenames
-	patt_pres="CCRC_NARCliM_Sydney_MK35_bc_1989-2009_"
-	patt_fut="CCRC_NARCliM_Sydney_MK35_bc_2039-2059_"
+	if (index.eq."SU") then
+		limit_up=180.
+		spacing=5.
+		stride=3.
+			spacing_c=2.5
+			stride_c=2
+	definition="(Tmax>25~S~o~N~C)"
+	end if
+	
+	if (index.eq."FD") then
+		limit_up=70.
+		spacing=2.5
+		stride=4.
+	definition="(Tmin<0~S~o~N~C)"
+	end if
+	
+	if (index.eq."ID") then
 
-	patt_imgout = "wrf2k_Sydney_ETCCDI_"
+	spacing=0.5
+	definition="(Tmax<0~S~o~N~C)"
+	end if
+	
+	if (index.eq."TN10p") then
+	limit_up=15
+	spacing=1
+	stride=2
+	spacing_c=1
+	
+	end if
+	
+	if (index.eq."TN50p") then
+		limit_up=100
+		limit_bot=40
+		spacing=2.5
+		stride=2.
+		spacing_c=2.5
+		stride_c=2.
+	end if
+	
+	if (index.eq."TN90p") then
+			limit_bot=5.
+			limit_up=90.
+			spacing=5
+			stride=2
+			spacing_c=5
+	
+	end if
+
+	if (index.eq."TX10p") then
+		limit_up=15
+		spacing=1
+		stride=2
+		spacing_c=1
+	end if
+	
+	if (index.eq."TX50p") then
+		limit_up=100
+		limit_bot=40
+		spacing=2.5
+		stride=2.
+		spacing_c=2.5
+		stride_c=2.
+	end if
+	
+	if (index.eq."TX90p") then
+		limit_bot=5.
+		limit_up=30
+		spacing=1
+		stride=2
+		spacing_c=1
+	end if
+	
+	if (index.eq."GSL") then
+		limit_bot=240	
+		limit_up=365
+		spacing=15	
+	spacing=15
+	end if
+	
+	
+	if (index.eq."TXx") then
+	limit_bot=25
+	limit_up=45
+	spacing=1
+	end if
+	
+	if (index.eq."TNn") then
+	limit_bot=-10
+	limit_up=8
+	spacing=1
+	end if
+	
+	if (index.eq."TXn") then
+	limit_bot=-2
+	limit_up=16
+	spacing=1
+	end if
+	
+	if (index.eq."TNx") then
+	limit_bot=10
+	limit_up=30
+	spacing=1
+	end if
+	
+	if (index.eq."DTR") then
+	limit_bot=6
+	limit_up=16
+	spacing=1
+	end if
+	
+	if (index.eq."WSDI") then
+	limit_bot=0
+	limit_up=10
+	spacing=0.5
+	stride=2
+	spacing_c=1
+	stride_c=2
+	end if
+	
+	if (index.eq."CSDI") then
+	limit_bot=0
+	limit_up=2
+	spacing=0.2
+	stride=2
+	spacing_c=0.2
+	stride_c=2
+	end if
+	
+	;PRECIP EXTREMES
+	
+	if (index.eq."R10mm") then
+		limit_up=60
+		spacing=2.5
+		spacing_c=1
+		stride_c=2.
+	definition=" "
+	end if
+	
+	if (index.eq."R20mm") then
+		limit_up=30
+		spacing=2.5
+		stride=2
+	spacing_c=1
+	stride_c=2
+	end if
+	
+	if (index.eq."SDII") then
+
+		limit_up=15
+		spacing=0.5
+		stride=2
+	end if
+	
+	if (index.eq."Rx1day") then
+			limit_up=200
+	spacing=10
+	stride=2
+	end if
+	
+	if (index.eq."Rx5day") then
+			limit_up=400
+	spacing=20
+	stride=2
+	end if
+	
+	if (index.eq."CDD") then
+		spacing_c=1
+		stride_c=2.
+		limit_up=60
+		spacing=2.5
+		stride=2
+	end if
+	
+	if (index.eq."CWD") then
+		limit_up=15
+		spacing=1
+		stride=2
+	spacing=1
+	stride=2
+	end if
+	
+	if (index.eq."R95p") then
+
+		limit_up=600
+		spacing=25
+		stride=2
+	end if
+	
+	if (index.eq."R99p") then
+		
+		limit_up=300
+		spacing=25
+		stride=2
+	end if
+	
+	if (index.eq."PRCPTOT") then
+		limit_up=2500
+		spacing=100
+		stride=2
+	end if
+	
+	
+	
+	
+	;pattern of the filenames
+	patt_pres="CCRC_NARCliM_Sydney_MK35_bc_1990-2009_"
+	patt_fut="CCRC_NARCliM_Sydney_MK35_bc_2040-2059_"
+
+	patt_imgout = "Sydney_ETCCDI_"
 	;---SETUP
 
 	zoom=True
@@ -118,6 +312,10 @@ begin
 	wrf_pres@units=f@units
 	print(wrf_pres@units)
 
+	if (index.eq."TN10p" .or. index.eq."TN50p" .or. index.eq."TN90p" .or. index.eq."TX10p" .or. index.eq."TX50p" .or. index.eq."TX90p") then
+		wrf_pres@units="% of days"
+	end if
+
 	; 	;#######################
 	; 	;--READ ETCCDI FUTURE
 	; 	;#######################
@@ -135,24 +333,43 @@ begin
 	wrf_fut!0 = "time"
 	wrf_fut@units=f2@units
 	print(wrf_fut@units)
+	printVarSummary(wrf_fut)
+	wrf_fut=mask(wrf_fut,wrf_fut.eq."nan",False)
+	wrf_fut@_FillValue=wrf_fut@missing_value
 
+
+	if (index .eq. "GSL") then
+		
+		wrf_pres2=wrf_pres(0:nyears-2,:,:)
+		wrf_fut2=wrf_fut(0:nyears-2,:,:)
+		
+		delete([/wrf_pres,wrf_fut/])
+		
+	
+		wrf_pres=wrf_pres2
+		wrf_fut=wrf_fut2
+	end if
 	;##################################
 	;#### END OF READING DATA #########
 	;##################################
 
 	print("calculate stats")
-	wrfann_pres=dim_avg_n(wrf_pres(1:,:,:),0)
-	wrfann_fut=dim_avg_n(wrf_fut(1:dsizes_f(0)-1,:,:),0)
+	wrfann_pres=dim_avg_n(wrf_pres,0)
+	wrfann_fut=dim_avg_n(wrf_fut,0)
 	wrfann_pres@lat2d = lat2d
 	wrfann_pres@lon2d = lon2d
 	wrfann_fut@lat2d = lat2d
 	wrfann_fut@lon2d = lon2d
 	
+	; if (index.eq."Rx1day" .or. index.eq."Rx5day")then
+	; 	wrfann_pre=dim_max_n(wrf_pres,0)
+	; 	wrfann_fut=dim_max_n(wrf_fut,0)
+	; end if
+	
 	
 	wrfann_pres=mask(wrfann_pres,lud_wrf,1)
 	wrfann_fut=mask(wrfann_fut,lud_wrf,1)
-	limit_up=ceil(max((/max(wrfann_pres),max(wrfann_fut)/))/5)*5
-
+	print(ceil(max((/max(wrfann_pres),max(wrfann_fut)/))/5)*5)
 
 	;calculate changes
 
@@ -166,7 +383,7 @@ begin
 	; #################################################
 	;from example panel_15.ncl
 	print("move to plotting")
-	wks_type="ps"
+	wks_type="pdf"
 	wks_type@wkOrientation="landscape"
 	wks = gsn_open_wks(wks_type,imgdiro+patt_imgout+index+"_changes")
 	gsn_define_colormap(wks, "WhViBlGrYeOrRe")
@@ -182,9 +399,9 @@ begin
 	res@gsnAddCyclic 	= False
 
 	res@cnLevelSelectionMode	= "ManualLevels"
-	res@cnMinLevelValF			= 0				;same manual levels
-	res@cnMaxLevelValF			= limit_up			;as other plots
-	res@cnLevelSpacingF			= 5.0			;
+	res@cnMinLevelValF			= tofloat(limit_bot)				;same manual levels
+	res@cnMaxLevelValF			= tofloat(limit_up)			;as other plots
+	res@cnLevelSpacingF			= tofloat(spacing)			;
 
 	;###### MY RESOURCES #####
 	
@@ -254,7 +471,7 @@ begin
 	pres1                     = True
 	pres1@gsnPanelLabelBar    = True       ; common label bar
 	pres1@gsnFrame            = False      ; don't advance frame yet
-	pres1@lbLabelAutoStride   = True 
+		pres1@lbLabelStride   = stride
 	pres1@lbTitleString	= wrf_pres@units
 	pres1@lbTitlePosition			= "Left"
 	pres1@lbTitleDirection		= "Across"
@@ -271,18 +488,25 @@ begin
 	;***************************************
 	; create third individual plots
 	;***************************************
+	printVarSummary(ind_changes)
 	
-	res@cnMinLevelValF		= 0			;same manual levels
-	res@cnMaxLevelValF		= ceil(max(max(ind_changes))/5)*5			;as other plots
-	res@cnLevelSpacingF	= 2.5			;
+	if(index.eq."FD".or.index.eq."ID".or.index.eq."TN10p".or.index.eq."TX10p".or.index.eq."CSDI")then
+	gsn_reverse_colormap(wks)
+	end if
+	
+	res@cnMinLevelValF		= (/floor(min(min(ind_changes))/2)*2/)			;same manual levels
+	res@cnMaxLevelValF		= (/ceil(max(max(ind_changes))/2)*2/)			;as other plots
+	;res@cnMinLevelValF		= -1.5 
+	;res@cnMaxLevelValF		= 5
+	res@cnLevelSpacingF	= spacing_c			;
 	plot2 = gsn_csm_contour_map(wks,ind_changes(:,:),res)
 
 
 	pres2                     = True
 	pres2@gsnPanelLabelBar    = True       ; common label bar
 	pres2@gsnFrame            = False      ; don't advance frame yet
-	pres2@lbLabelStride   = 2 
-	pres2@lbTitleString	= wrf_pres@units
+	pres2@lbLabelStride   = stride_c 
+	;pres2@lbTitleString	= wrf_pres@units
 	pres2@lbTitlePosition			= "Left"
 	pres2@lbTitleDirection		= "Across"
 	pres2@lbTitleFontHeightF		= 0.014
@@ -304,7 +528,7 @@ begin
 	txres               = True                     ; text mods desired
 	txres@txFontHeightF = 0.02                 ; font smaller. default big
 	txres@txJust = "topCenter" ;; justification of text coordinates
-	gsn_text_ndc(wks,"Changes in "+f@long_name+" "+definition+" MK3.5",0.45,0.8,txres)
+	gsn_text_ndc(wks,"Changes in "+index+" "+definition+" MK3.5",0.45,0.8,txres)
 	frame(wks)
 
 	; 

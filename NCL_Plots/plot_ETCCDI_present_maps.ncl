@@ -29,28 +29,204 @@ begin
 
 	;---WRF DOMAINS
 
-	index="TR"
+	index="TN90p"
 	;pattern of the filenames
-	patt_nnrp="CCRC_NARCliM_Sydney_1989-2009_"
-	patt_oeh="CCRC_NARCliM_Sydney_2039-2059_"
+	patt_awap="CCRC_NARCliM_Sydney_AWAP_1990-2009_"
+	patt_nnrp="CCRC_NARCliM_Sydney_NNRP_1990-2009_"
+	patt_mk35="CCRC_NARCliM_Sydney_MK35_bc_1990-2009_"
 
-	patt_imgout = "wrf2k_Sydney_ETCCDI_"
+
+
+	patt_imgout = "Sydney_ETCCDI_"
 	;---SETUP
+		limit_bot=0
+		stride=1
+	if (index.eq."TR") then
+	limit_up=35
+	spacing=5
+	end if
+	
+	if (index.eq."SU") then
+	limit_up=150
+	spacing=5
+	end if
+	
+	if (index.eq."FD") then
+	limit_up=50
+	spacing=5
+	end if
+	
+	if (index.eq."ID") then
+	limit_up=10
+	spacing=0.5
+	end if
+	
+	if (index.eq."TN10p") then
+	limit_up=30
+	spacing=2.5
+	end if
+	
+	if (index.eq."TN50p") then
+	limit_up=100
+	spacing=5
+	end if
+	
+	if (index.eq."TN90p") then
+	limit_up=30
+	spacing=2.5
+	end if
 
+	if (index.eq."TX10p") then
+	limit_up=30
+	spacing=2.5
+	end if
+	
+	if (index.eq."TX50p") then
+	limit_up=100
+	spacing=5
+	end if
+	
+	if (index.eq."TX90p") then
+	limit_up=30
+	spacing=2.5
+	end if
+	
+	if (index.eq."GSL") then
+	limit_bot=240	
+	limit_up=365
+	spacing=15
+	end if
+	
+	if (index.eq."TXx") then
+	limit_bot=25
+	limit_up=45
+	spacing=1
+	end if
+	
+	if (index.eq."TNn") then
+	limit_bot=-10
+	limit_up=8
+	spacing=1
+	end if
+	
+	if (index.eq."TXn") then
+	limit_bot=-2
+	limit_up=16
+	spacing=1
+	end if
+	
+	if (index.eq."TNx") then
+	limit_bot=10
+	limit_up=30
+	spacing=1
+	end if
+	
+	if (index.eq."DTR") then
+	limit_bot=6
+	limit_up=16
+	spacing=1
+	end if
+	
+	if (index.eq."WSDI") then
+	limit_bot=0
+	limit_up=4
+	spacing=0.25
+	stride=2
+	end if
+	
+	if (index.eq."CSDI") then
+	limit_bot=0
+	limit_up=3
+	spacing=0.25
+	stride=2
+	end if
+	
+	;PRECIP EXTREMES
+	
+	if (index.eq."R10mm") then
+	limit_bot=0
+	limit_up=60
+	spacing=5
+	end if
+	
+	if (index.eq."R20mm") then
+	limit_bot=0
+	limit_up=30
+	spacing=2.5
+	stride=2
+	end if
+	
+	if (index.eq."SDII") then
+	limit_bot=0
+	limit_up=15
+	spacing=0.5
+	stride=2
+	end if
+	
+	if (index.eq."Rx1day") then
+	limit_bot=0
+	limit_up=200
+	spacing=10
+	stride=2
+	end if
+	
+	if (index.eq."Rx5day") then
+	limit_bot=0
+	limit_up=400
+	spacing=20
+	stride=2
+	end if
+	
+	if (index.eq."CDD") then
+	limit_bot=0
+	limit_up=60
+	spacing=2.5
+	stride=2
+	end if
+	
+	if (index.eq."CWD") then
+	limit_bot=0
+	limit_up=20
+	spacing=1
+	stride=2
+	end if
+	
+	if (index.eq."R95p") then
+	limit_bot=0
+	limit_up=600
+	spacing=25
+	stride=2
+	end if
+	
+	if (index.eq."R99p") then
+	limit_bot=0
+	limit_up=300
+	spacing=25
+	stride=2
+	end if
+	
+	if (index.eq."PRCPTOT") then
+	limit_bot=0
+	limit_up=2500
+	spacing=100
+	stride=2
+	end if
+	
+	
 	zoom=True
 
 	syear_pres = 1990
 	eyear_pres = 2009
-
+	nyears=eyear_pres-syear_pres+1
 	;directories
 
 	imgdiro = "~/Analyses/Sydney2km/ETCCDI/images/"
 	diri_inv = "/home/z3393020/Analyses/Sydney2km/geo_em_files/" ; files to get the invariant fields.
 
 
-
+	diri_awap = "/scratch/z3393020/ETCCDI/fclimdex_RCM/index/"
 	diri_nnrp = "/scratch/z3393020/ETCCDI/fclimdex_RCM/index/"
-	diri_std = "/scratch/z3393020/ETCCDI/fclimdex_RCM/index/"
+	diri_mk35 = "/scratch/z3393020/ETCCDI/fclimdex_RCM/index/"
 
 	;---SETUP LANDUSE MASK
 	;use landuse data to mask out ocean from plots
@@ -71,10 +247,36 @@ begin
 	;--READ ETCCDI PRESENT
 	;#######################
 
-	f = addfile(diri_nnrp+patt_nnrp+index+".nc","r")
+	;AWAP
+	
+	f = addfile(diri_awap+patt_awap+index+".nc","r")
 
-	wrf_nnrp=f->Annual
-	dsizes=dimsizes(wrf_nnrp)
+	awap=f->Annual
+	dsizes=dimsizes(awap)
+	
+	awap_aux=addfile("/scratch/z3393020/ETCCDI/fclimdex_RCM/tmin.SYD.1990-2009.nc","r")
+	obslat=	awap_aux->lat
+	obslon=	awap_aux->lon
+	
+	
+	awap!1 = "lat"
+	awap!2 = "lon"
+	awap!0 = "time"
+	awap&lat = obslat
+	awap&lon = obslon
+	awap@units=f@units
+	print(awap@units)
+	awap@_FillValue=awap@missing_value
+	
+		
+	lud_awap = rcm2rgrid(lud_xlat,lud_xlon,lud_wrf,awap&lat,awap&lon,0)
+
+	;WRF-NNRP
+	
+	f2 = addfile(diri_nnrp+patt_nnrp+index+".nc","r")
+
+	wrf_nnrp=f2->Annual
+	dsizes_f=dimsizes(wrf_nnrp)
 
 
 	wrf_nnrp@lat2d = lat2d
@@ -82,64 +284,84 @@ begin
 	wrf_nnrp!1 = "lat"
 	wrf_nnrp!2 = "lon"
 	wrf_nnrp!0 = "time"
-	wrf_nnrp@units=f@units
+	wrf_nnrp@units=f2@units
 	print(wrf_nnrp@units)
 
-	; 	;#######################
-	; 	;--READ ETCCDI STD
-	; 	;#######################
-	; 
-	f2 = addfile(diri_std+patt_std+index+".nc","r")
+	if (index.eq."TN10p" .or. index.eq."TN50p" .or. index.eq."TN90p" .or. index.eq."TX10p" .or. index.eq."TX50p" .or. index.eq."TX90p") then
+		wrf_nnrp@units="% of days"
+	end if
+		
 
-	wrf_std=f2->Annual
-	dsizes_f=dimsizes(wrf_std)
+	;WRF-MK35
 
+	f3 = addfile(diri_mk35+patt_mk35+index+".nc","r")
 
-	wrf_std@lat2d = lat2d
-	wrf_std@lon2d = lon2d
-	wrf_std!1 = "lat"
-	wrf_std!2 = "lon"
-	wrf_std!0 = "time"
-	wrf_std@units=f2@units
-	print(wrf_std@units)
+	wrf_mk35=f3->Annual
+	dsizes_f=dimsizes(wrf_mk35)
 
 
-	; 	;#######################
-	; 	;--READ ETCCDI OEH
-	; 	;#######################
-	; 
-	f3 = addfile(diri_oeh+patt_nnrp+index+".nc","r")
+	wrf_mk35@lat2d = lat2d
+	wrf_mk35@lon2d = lon2d
+	wrf_mk35!1 = "lat"
+	wrf_mk35!2 = "lon"
+	wrf_mk35!0 = "time"
+	wrf_mk35@units=f2@units
+	print(wrf_mk35@units)
 
-	wrf_oeh=f3->Annual
-	dsizes_f=dimsizes(wrf_oeh)
-
-
-	wrf_oeh@lat2d = lat2d
-	wrf_oeh@lon2d = lon2d
-	wrf_oeh!1 = "lat"
-	wrf_oeh!2 = "lon"
-	wrf_oeh!0 = "time"
-	wrf_oeh@units=f2@units
-	print(wrf_oeh@units)
-
+	if (index .eq. "GSL") then
+		awap2=awap(0:nyears-2,:,:)
+		wrf_nnrp2=wrf_nnrp(0:nyears-2,:,:)
+		wrf_mk352=wrf_mk35(0:nyears-2,:,:)
+		
+		delete([/awap,wrf_nnrp,wrf_mk35/])
+		
+		awap=awap2
+		wrf_nnrp=wrf_nnrp2
+		wrf_mk35=wrf_mk352
+	end if
+		
 	;##################################
 	;#### END OF READING DATA #########
 	;##################################
 
+
+	printVarSummary(awap)
+
+
 	print("calculate stats")
-	wrfann_nnrp=dim_avg_n(wrf_nnrp(1:,:,:),0)
-	wrfann_std=dim_avg_n(wrf_std(1:dsizes_f(0)-1,:,:),0)
-	wrfann_nnrp@lat2d = lat2d
-	wrfann_nnrp@lon2d = lon2d
-	wrfann_std@lat2d = lat2d
-	wrfann_std@lon2d = lon2d
-	wrfann_oeh@lat2d = lat2d
-	wrfann_oeh@lon2d = lon2d
+	awap_ann=dim_avg_n(awap,0)
+	nnrp_ann=dim_avg_n(wrf_nnrp,0)
+	mk35_ann=dim_avg_n(wrf_mk35,0)
 	
-	wrfann_nnrp=mask(wrfann_nnrp,lud_wrf,1)
-	wrfann_std=mask(wrfann_std,lud_wrf,1)
-	wrfann_oeh=mask(wrfann_oeh,lud_wrf,1)
-	limit_up=max((/max(wrfann_nnrp),max(wrfann_std),max(wrfann_oeh)/))
+	; if (index.eq."Rx1day" .or. index.eq."Rx5day")then
+	; 	awap_ann=dim_max_n(awap,0)
+	; 	nnrp_ann=dim_max_n(wrf_nnrp,0)
+	; 	mk35_ann=dim_max_n(wrf_mk35,0)
+	; end if
+	
+	
+	
+	awap_ann@_FillValue=awap@missing_value
+	nnrp_ann@_FillValue=wrf_nnrp@missing_value
+	mk35_ann@_FillValue=wrf_mk35@missing_value
+
+	awap_ann!0 = "lat"
+	awap_ann!1 = "lon"
+	awap_ann&lat = awap&lat
+	awap_ann&lon = awap&lon
+	nnrp_ann@lat2d = lat2d
+	nnrp_ann@lon2d = lon2d
+	mk35_ann@lat2d = lat2d
+	mk35_ann@lon2d = lon2d
+	
+		printVarSummary(mk35_ann)
+
+	
+	
+	; awap_ann=mask(awap_ann,lud_awap,1)
+	 	nnrp_ann=mask(nnrp_ann,lud_wrf,1)
+	 	mk35_ann=mask(mk35_ann,lud_wrf,1)
+	; limit_up=max((/max(awap_ann),max(nnrp_ann),max(mk35_ann)/))
 
 
 
@@ -148,11 +370,11 @@ begin
 	; #################################################
 	;from example panel_15.ncl
 	print("move to plotting")
-	wks_type="ps"
+	wks_type="pdf"
 	wks_type@wkOrientation="landscape"
 	wks = gsn_open_wks(wks_type,imgdiro+patt_imgout+index)
 	gsn_define_colormap(wks, "WhViBlGrYeOrRe")
-	plot=new(2,graphic)
+	plot=new(3,graphic)
 
 	res=True
 	res@cnFillOn		= True			;; turn on color
@@ -164,9 +386,9 @@ begin
 	res@gsnAddCyclic 	= False
 
 	res@cnLevelSelectionMode	= "ManualLevels"
-	res@cnMinLevelValF			= 0				;same manual levels
+	res@cnMinLevelValF			= limit_bot			;same manual levels
 	res@cnMaxLevelValF			= limit_up			;as other plots
-	res@cnLevelSpacingF			= 5.0			;
+	res@cnLevelSpacingF			= spacing		;
 
 	;###### MY RESOURCES #####
 	
@@ -224,10 +446,13 @@ begin
 	res@mpLambertMeridianF		= 146.1
 
 	;###### END OF MY RESOURCES #####
+	printVarSummary(awap_ann)
 
-	plot(0)=gsn_csm_contour_map(wks,wrfann_nnrp(:,:),res)
-	plot(1)=gsn_csm_contour_map(wks,wrfann_std(:,:),res)
-	plot(2)=gsn_csm_contour_map(wks,wrfann_oeh(:,:),res)
+
+
+	plot(0)=gsn_csm_contour_map(wks,awap_ann,res)
+	plot(1)=gsn_csm_contour_map(wks,nnrp_ann,res)
+	plot(2)=gsn_csm_contour_map(wks,mk35_ann,res)
 
 
 
@@ -237,12 +462,13 @@ begin
 	pres1                     = True
 	pres1@gsnPanelLabelBar    = True       ; common label bar
 	pres1@gsnFrame            = False      ; don't advance frame yet
-	pres1@lbLabelAutoStride   = True 
-	pres1@lbTitleString	= wrf_pres@units
+	pres1@lbLabelAutoStride   = False
+	pres1@lbLabelStride = stride
+	pres1@lbTitleString	= wrf_nnrp@units
 	pres1@lbTitlePosition			= "Left"
 	pres1@lbTitleDirection		= "Across"
 	pres1@lbTitleFontHeightF		= 0.01
-	pres1@gsnPanelFigureStrings			= (/"NNRP","MK3.5_Std","MK3.5_OEH"/)
+	pres1@gsnPanelFigureStrings			= (/"AWAP","NNRP","MK3.5_OEH"/)
 	gsn_panel(wks,plot,(/1,3/),pres1)
 
 
@@ -261,7 +487,7 @@ begin
 	txres               = True                     ; text mods desired
 	txres@txFontHeightF = 0.02                 ; font smaller. default big
 	txres@txJust = "topCenter" ;; justification of text coordinates
-	gsn_text_ndc(wks,"Changes in "+f@long_name+" (MK3.5)",0.45,0.8,txres)
+	gsn_text_ndc(wks,f@long_name+" "+definition+" (1990-2009)",0.45,0.8,txres)
 	frame(wks)
 
 	; 

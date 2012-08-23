@@ -64,7 +64,7 @@
     string=adjustl(string)
     if(len_trim(string) == 0) return  ! the hours are in unit of YYYYMMDD already.
     if((string(1:6)=='day as') .or. (string(1:7)=='days as')) return
-    if(string(1:4)=='hour')    hours=hours/24-1        ! days
+    if(string(1:4)=='hour')    hours=ceiling(hours/24.)        ! days
 
     if((string(1:3)/='day') .and. (string(1:4)/='hour')) then
       print*,'======= Congratulations ! ======'
@@ -116,8 +116,12 @@
         if(leapyear(i)==1) t0=t0+1
       enddo
     endif
+	print*,t0
+	print*,S_day
+	print*,S_mon
+	print*,S_year
     t0=t0+days(S_mon,leapyear(S_year)+1)+S_day-1  ! total days before the start date
-
+	print*,'t0 is: ',t0
     hours=hours+t0   ! days after 0000/00/00
 
    do i=1,n
@@ -155,6 +159,7 @@
      endif
 
      hours(i)=S_year*10000+S_mon*100+S_day  ! YYYYMMDD
+
    enddo
 
 !stop

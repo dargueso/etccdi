@@ -22,7 +22,7 @@
 !      real(4),dimension(:),allocatable,save :: time ! time is YYYYMMDD, which is actually YYYY0000
       logical   :: Tmax_miss,Tmin_miss,Prcp_miss, &  ! check if ALL data is missing...
                    save_thresholds, &                ! whether the threshold data should be saved.
-                   sub_folder,is_rcm                         ! put indices in different sub_folders or in same folder
+                   sub_folder,is_rcm,is_thresfile                         ! put indices in different sub_folders or in same folder
 			
       data MON    /31,28,31,30,31,30,31,31,30,31,30,31, &
                    31,29,31,30,31,30,31,31,30,31,30,31/

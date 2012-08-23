@@ -1,10 +1,11 @@
-      subroutine TX10p(Tout,wcsdi,thresOut,is_thresfile,lon_i,lat_j)  ! tn10out,tn50out,tn90out,tx10out,tx50out,tx90out (13 months); wsdi,csdi
+      subroutine TX10p(Tout,wcsdi,thresOut,lat_j,lon_i)  ! tn10out,tn50out,tn90out,tx10out,tx50out,tx90out (13 months); wsdi,csdi
       use COMM
       use functions
+	  use netcdf
        character*80:: ofile,file_thres
        integer:: year, month, day, kth, cnt, nn,  missxcnt, missncnt,	&
              iter, cntx, cntn,i,byear,flgtn,flgtx,flg,j,ID, Ky, &!,idum
-			 ncid,lon_i,lat_j
+			 ncidt,status,ID_varn10,ID_varn50,ID_varn90,ID_varx10,ID_varx50,ID_varx90,lat_j,lon_i
        real::Tout(YRS,13,6),wcsdi(YRS,2)
        real,dimension(DoY,BYRS,BYRS-1) :: thresbx50,thresbn50,thresbn10,thresbn90,thresbx90,thresbx10
        real,dimension(DoY,3)           :: threstmp
@@ -19,13 +20,11 @@
 
        integer :: SmByear ! SYear-BaseYear
 
-	   logical::is_thresfile
-
       data rlevs/0.1,0.5,0.9/
 
       if(Tmax_miss .and. Tmin_miss) return
 
-      BYRSm=BYRS-1.0
+      BYRSm=BYRS-1.0 
       rDoY=100.0/DoY
       cnt=0
       nn=0
@@ -54,6 +53,7 @@
           stop
         endif
       enddo
+			!This creates an array to calculate percentiles using a windowsize (2*SS)
 
             tndata(1,1:SS)=tndtmp(1,1)  ! i=1
             txdata(1,1:SS)=txdtmp(1,1)
@@ -72,28 +72,33 @@
 ! Use an external file for thresholds or calculate them
 
 if (is_thresfile) then
-file_thres='thresholds.nc'
-call err_handle(nf90_open(file_thres,NF90_nowrite,ncid), 'open file')
+	flgtn=0
+    flgtx=0
+file_thres="thresholds.nc"
+call err_handle(nf90_open(file_thres,NF90_nowrite,ncidt), 'open file')
 
 
-call err_handle(NF90_INQ_VARID (ncid, 'thresan10', ID_var),'inquire thresan10 var ID')
-call err_handle(NF90_get_var(ncid,ID_var,thresan10,start = (/ lon_i, lat_j, 1/),count = (/ 1, 1, DoY /),'get Var thresan10')
+call err_handle(NF90_INQ_VARID (ncidt, "thresan10", ID_varn10),'inquire thresan10 var ID')
 
-call err_handle(NF90_INQ_VARID (ncid, 'thresan50', ID_var),'inquire thresan50 var ID')
-call err_handle(NF90_get_var(ncid,ID_var,thresan50,start = (/ lon_i, lat_j, 1/),count = (/ 1, 1, DoY /),'get Var thresan50')
+call err_handle(NF90_get_var(ncidt,ID_varn10,thresan10,start=(/lon_i,lat_j,1/),count=(/1,1,DoY/)),'get Var thresan10')
 
-call err_handle(NF90_INQ_VARID (ncid, 'thresan90', ID_var),'inquire thresan90 var ID')
-call err_handle(NF90_get_var(ncid,ID_var,thresan90,start = (/ lon_i, lat_j, 1/),count = (/ 1, 1, DoY /),'get Var thresan90')
+call err_handle(NF90_INQ_VARID (ncidt, "thresan50", ID_varn50),'inquire thresan50 var ID')
+call err_handle(NF90_get_var(ncidt,ID_varn50,thresan50,start=(/lon_i,lat_j,1/),count=(/1,1,DoY/)),'get Var thresan50')
+
+call err_handle(NF90_INQ_VARID (ncidt, "thresan50", ID_varn90),'inquire thresan90 var ID')
+call err_handle(NF90_get_var(ncidt,ID_varn90,thresan90,start=(/lon_i,lat_j,1/),count=(/1,1,DoY/)),'get Var thresan90')
 
 
-call err_handle(NF90_INQ_VARID (ncid, 'thresax10', ID_var),'inquire thresax10 var ID')
-call err_handle(NF90_get_var(ncid,ID_var,thresax10,start = (/ lon_i, lat_j, 1/),count = (/ 1, 1, DoY /),'get Var thresax10')
+call err_handle(NF90_INQ_VARID (ncidt, "thresax10", ID_varx10),'inquire thresax10 var ID')
+call err_handle(NF90_get_var(ncidt,ID_varx10,thresax10,start=(/lon_i,lat_j,1/),count=(/1,1,DoY/)),'get Var thresax10')
 
-call err_handle(NF90_INQ_VARID (ncid, 'thresax50', ID_var),'inquire thresax50 var ID')
-call err_handle(NF90_get_var(ncid,ID_var,thresax50,start = (/ lon_i, lat_j, 1/),count = (/ 1, 1, DoY /),'get Var thresax50')
+call err_handle(NF90_INQ_VARID (ncidt, "thresax50",ID_varx50),'inquire thresax50 var ID')
+call err_handle(NF90_get_var(ncidt,ID_varx50,thresax50,start=(/lon_i,lat_j,1/),count=(/1,1,DoY/)),'get Var thresax50')
 
-call err_handle(NF90_INQ_VARID (ncid, 'thresax90', ID_var),'inquire thresax90 var ID')
-call err_handle(NF90_get_var(ncid,ID_var,thresax90,start = (/ lon_i, lat_j, 1/),count = (/
+call err_handle(NF90_INQ_VARID (ncidt, "thresax90", ID_varx90),'inquire thresax90 var ID')
+call err_handle(NF90_get_var(ncidt,ID_varx90,thresax90,start=(/lon_i,lat_j,1/),count=(/1,1,DoY/)),'get Var thresax90')
+
+call err_handle(nf90_close(ncidt), 'close file')
 
 else
       flgtn=0
@@ -145,6 +150,7 @@ endif
      thresOut(:,5)=thresax50
      thresOut(:,6)=thresax90
 
+if (.not. is_thresfile) then
 !$OMP parallel do default(shared) private(i,nn,txboot,tnboot,iter,threstmp,flg)
       do i=1,BYRS   ! This part consumes most of the time, due to "threshold"...
         txboot=txdata
@@ -172,7 +178,7 @@ endif
         enddo
       enddo
 !$OMP end parallel do
-
+end if
       if(flgtx.eq.0)then
         tx10out=0.
         tx50out=0.
@@ -183,6 +189,10 @@ endif
         tn50out=0.
         tn90out=0.
       endif
+
+
+
+
 
       cnt=0
       do i=1,YRS
@@ -204,10 +214,7 @@ endif
                 if(TMAX(cnt).lt.thresax10(nn)) tx10out(i,month)= tx10out(i,month)+1
               else
                 do iter=1,BYRS-1
-!                    if(byear.gt.30.or.iter.gt.29) then
-!                      print *, i, year,month,day
-!                      stop
-!                    endif
+
                   if(TMAX(cnt).gt.thresbx90(nn,byear,iter))   tx90out(i,month)=tx90out(i,month)+1
                   if(TMAX(cnt).gt.thresbx50(nn,byear,iter))   tx50out(i,month)=tx50out(i,month)+1
                   if(TMAX(cnt).lt.thresbx10(nn,byear,iter))   tx10out(i,month)=tx10out(i,month)+1
@@ -247,10 +254,6 @@ endif
             tx10out(i,month)=tx10out(i,month)/BYRSm
           endif
 
-!          if(year.eq.1952) then
-!            print *,year,month,tn10out(i,month),tn90out(i,month)
-!          endif
-
           if(missxcnt.le.10.and.flgtx.eq.0)then
             temp=100./(kth-missxcnt)
             tx90out(i,13)=tx90out(i,13)+tx90out(i,month)
@@ -259,6 +262,7 @@ endif
             tx50out(i,month)=tx50out(i,month)*temp
             tx10out(i,13)=tx10out(i,13)+tx10out(i,month)
             tx10out(i,month)=tx10out(i,month)*temp
+		
           else
             tx90out(i,month)=MISSING
             tx50out(i,month)=MISSING
@@ -272,6 +276,7 @@ endif
             tn50out(i,month)=tn50out(i,month)*temp
             tn10out(i,13)=tn10out(i,13)+tn10out(i,month)
             tn10out(i,month)=tn10out(i,month)*temp
+
           else
             tn90out(i,month)=MISSING
             tn50out(i,month)=MISSING
@@ -298,6 +303,8 @@ endif
         endif
       enddo
 
+
+
 130   continue
 
       cnt=0
@@ -320,6 +327,7 @@ endif
           do day=1,kth
             if(month.ne.2.or.day.ne.29) nn=nn+1
             cnt=cnt+1
+
             if(TMAX(cnt).gt.thresax90(nn).and.nomiss(TMAX(cnt))) then
               cntx=cntx+1
               if(month.eq.12.and.day.eq.31.and.cntx.ge.6)   wsdi(i)=wsdi(i)+cntx

@@ -93,12 +93,12 @@ TX10pout(Nlon,Nlat,YRS,13,6),wcsdi(Nlon,Nlat,YRS,2))
 thresout=MISSING; QCout=MISSING; FDout=MISSING; GSLout=MISSING; TXXout=MISSING; Rnmout=MISSING; RXout=MISSING
 CDDout=MISSING; R95pout=MISSING; TX10pout=MISSING; wcsdi=MISSING
 
-do j=1,Nlat
-LATITUDE=lat(j)
-do i=1,Nlon
-TMAX(:)=data_tmax(i,j,:)
-TMIN(:)=data_tmin(i,j,:)
-PRCP(:)=data_prcp(i,j,:)
+do lat_j=1,Nlat
+LATITUDE=lat(lat_j)
+do lon_i=1,Nlon
+TMAX(:)=data_tmax(lon_i,lat_j,:)
+TMIN(:)=data_tmin(lon_i,lat_j,:)
+PRCP(:)=data_prcp(lon_i,lat_j,:)
 
 Tmax_miss=.false.; Tmin_miss=.false.; Prcp_miss=.false.
 
@@ -110,15 +110,15 @@ if(Tmax_miss .and. Tmin_miss .and. Prcp_miss) goto 78
 !             goto,78
 !          endif
 
-call qc(QCout(i,j,:,:,:))   ! PRCPmiss,TMAXmiss,TMINmiss (13 months) in NASTAT 
-call FD(FDout(i,j,:,:))     ! FD, SU, ID, TR (Annual)
-call GSL(GSLout(i,j,:))    ! GSL (Annual)
-call TXX(TXXout(i,j,:,:,:))    ! TXx, TXn, TNx, TNn, DTR (13 months)
-call Rnnmm(Rnmout(i,j,:,:))  ! R10mm, R20mm, Rnnmm, SDII (Annual)
-call RX5day(RXout(i,j,:,:,:)) ! Rx1day, Rx5day (13 months)
-call CDD(CDDout(i,j,:,:))    ! CDD, CWD (Annual)
-call R95p(R95pout(i,j,:,:))   ! R95p, R99p, PRCPtot (Annual)
-call TX10p(TX10Pout(i,j,:,:,:),wcsdi(i,j,:,:),thresout(i,j,:,:),is_thresfile,i,j)   ! tn10p,tn50p,tn90p,tx10p,tx50p,tx90p (13 months); wsdi,csdi (Annual)
+call qc(QCout(lon_i,lat_j,:,:,:))   ! PRCPmiss,TMAXmiss,TMINmiss (13 months) in NASTAT 
+call FD(FDout(lon_i,lat_j,:,:))     ! FD, SU, ID, TR (Annual)
+call GSL(GSLout(lon_i,lat_j,:))    ! GSL (Annual)
+call TXX(TXXout(lon_i,lat_j,:,:,:))    ! TXx, TXn, TNx, TNn, DTR (13 months)
+call Rnnmm(Rnmout(lon_i,lat_j,:,:))  ! R10mm, R20mm, Rnnmm, SDII (Annual)
+call RX5day(RXout(lon_i,lat_j,:,:,:)) ! Rx1day, Rx5day (13 months)
+call CDD(CDDout(lon_i,lat_j,:,:))    ! CDD, CWD (Annual)
+call R95p(R95pout(lon_i,lat_j,:,:))   ! R95p, R99p, PRCPtot (Annual)
+call TX10p(TX10Pout(lon_i,lat_j,:,:,:),wcsdi(lon_i,lat_j,:,:),thresout(lon_i,lat_j,:,:),lat_j,lon_i)   ! tn10p,tn50p,tn90p,tx10p,tx50p,tx90p (13 months); wsdi,csdi (Annual)
 78      continue
 enddo
 enddo

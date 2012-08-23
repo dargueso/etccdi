@@ -233,6 +233,7 @@ do i=1,3
 	call err_handle(NF90_INQUIRE_DIMENSION (NCID(i),dimids_time(1),len=len_time(i)),'inq dimensions for length') 
 	deallocate(dimids_time)     
 	enddo
+	print*, len_time
 	if (len_time(1) /= len_time(2)) stop 'Maximum and mininum temperatures do not have the same time coverage'
 
 attribute=''
@@ -306,7 +307,7 @@ if(NF90_GET_ATT(NCID(2), ID_var(3),'missing_value',miss) == NF90_noerr) then
 do i=1,3
 	call err_handle(NF90_CLOSE(NCID(i)),'close file')
 	enddo
-
+print*,t1(1),t2(1),t3(1)
 Syear=min(t1(1),t2(1),t3(1))/10000
 Eyear=max(t1(len_time(1)),t2(len_time(2)),t3(len_time(3)))/10000
 YRS=Eyear-Syear+1

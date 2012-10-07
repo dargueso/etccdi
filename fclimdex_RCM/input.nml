@@ -10,10 +10,10 @@ tmax_dir='tmax.nc'
 tmin_dir='tmin.nc'
 prcp_dir='pre.nc'
 STDSPAN=5,
-BASESYEAR=2040,
-BASEEYEAR=2059,
+BASESYEAR=1960,
+BASEEYEAR=1990,
 PRCPNN=25,
-Outname='CCRC_NARCliM_Sydney_MK35'
+Outname='CCRC_NARCliM_R1_'
 
 
 !save_thresholds=F,     ! DO NOT save the thresholds
@@ -27,9 +27,9 @@ log_file='1990-2011.log'     ! log file
 is_rcm=T 
 !name of the variables
 
-prec_name='pracc_bc'
-tmax_name='tasmax_bc'
-tmin_name='tasmin_bc'
+prec_name='pracc'
+tmax_name='tasmax'
+tmin_name='tasmin'
 
 !threshold file
 is_thresfile=F   !USE thresholds.nc

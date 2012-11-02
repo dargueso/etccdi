@@ -12,6 +12,7 @@
 ;	10/08/2012
 ;
 ;Last Modified:
+; 31/10/2012 Fixed no ZOOM option
 
 
 begin
@@ -31,7 +32,7 @@ begin
 
 	;---WRF DOMAINS
 
-	index="Rx5day"
+	index="TX10p"
 	
 	
 		limit_bot=0.
@@ -120,7 +121,7 @@ begin
 		limit_up=30
 		spacing=1
 		stride=2
-		spacing_c=1
+		spacing_c=5
 	end if
 	
 	if (index.eq."GSL") then
@@ -262,7 +263,7 @@ begin
 	patt_imgout = "Sydney_ETCCDI_"
 	;---SETUP
 
-	zoom=True
+	zoom=False
 
 	syear_pres = 1990
 	eyear_pres = 2009
@@ -288,7 +289,7 @@ begin
 	lat2d = luf->XLAT_M(0,:,:)
 	lon2d = luf->XLONG_M(0,:,:)
 
-
+	domsize=dimsizes(lat2d)
 
 
 
@@ -349,6 +350,16 @@ begin
 		wrf_pres=wrf_pres2
 		wrf_fut=wrf_fut2
 	end if
+	
+	wrf_pres(:,0:5,:)=-999.9;
+	wrf_pres(:,:,0:5)=-999.9;
+	wrf_pres(:,:,domsize(1)-6:domsize(1)-1)=-999.9;
+	wrf_pres(:,domsize(0)-6:domsize(0)-1,:)=-999.9;
+	
+	wrf_fut(:,0:5,:)=-999.9;
+	wrf_fut(:,:,0:5)=-999.9;
+	wrf_fut(:,:,domsize(1)-6:domsize(1)-1)=-999.9;
+	wrf_fut(:,domsize(0)-6:domsize(0)-1,:)=-999.9;
 	;##################################
 	;#### END OF READING DATA #########
 	;##################################
@@ -383,13 +394,16 @@ begin
 	; #################################################
 	;from example panel_15.ncl
 	print("move to plotting")
-	wks_type="pdf"
+	wks_type="ps"
 	wks_type@wkOrientation="landscape"
 	wks = gsn_open_wks(wks_type,imgdiro+patt_imgout+index+"_changes")
 	gsn_define_colormap(wks, "WhViBlGrYeOrRe")
 	plot=new(2,graphic)
 
 	res=True
+	
+	
+	
 	res@cnFillOn		= True			;; turn on color
 	res@cnLinesOn		= False
 	res@gsnSpreadColors = True
@@ -397,6 +411,7 @@ begin
 	res@gsnDraw			= False
 	res@gsnFrame		= False
 	res@gsnAddCyclic 	= False
+	res@gsnMaximize		= True
 
 	res@cnLevelSelectionMode	= "ManualLevels"
 	res@cnMinLevelValF			= tofloat(limit_bot)				;same manual levels
@@ -431,10 +446,6 @@ begin
 	res@mpOceanFillColor = 0
 	res@mpFillDrawOrder = "PostDraw"
 
-	res@mpLeftCornerLatF	= min(lat2d)	;
-	res@mpLeftCornerLonF	= min(lon2d)	;extend beyond strict
-	res@mpRightCornerLatF	= max(lat2d)	;grt syd domain
-	res@mpRightCornerLonF	= max(lon2d)	;
 
 	if (zoom) then
 		;zoom to Sydney urban region
@@ -442,8 +453,26 @@ begin
 		res@mpLeftCornerLonF     = 149.90          ;zoom
 		res@mpRightCornerLatF     = -34.54          ;to urban
 		res@mpRightCornerLonF     = 151.5          ;
+		res@mpProjection				= "LambertConformal"
+		res@mpLambertParallel1F		= -27.5
+		res@mpLambertParallel2F		= -35.
+		res@mpLambertMeridianF		= 146.1
 
+	else
+		
+			res@mpLeftCornerLatF	= lat2d(0,0)	;
+			res@mpLeftCornerLonF	= lon2d(0,0)	;extend beyond strict
+			res@mpRightCornerLatF	= lat2d(domsize(0)-1,domsize(1)-1)	;grt syd domain
+			res@mpRightCornerLonF	= lon2d(domsize(0)-1,domsize(1)-1)	;
+			truelat1 = luf@TRUELAT1
+			truelat2 = luf@TRUELAT2
+			cen_lat = luf@CEN_LAT
+			stand_lon = luf@STAND_LON
 
+			res@mpProjection  = "LambertConformal"
+			res@mpLambertParallel1F = truelat1
+			res@mpLambertParallel2F = truelat2
+			res@mpLambertMeridianF = stand_lon
 	end if
 
 	res@mpGridAndLimbOn			= True		;reference lat/
@@ -453,10 +482,7 @@ begin
 	res@gsnCenterString			= ""			;labelling
 	res@gsnLeftString			= "" 		;for each panel
 	res@lbLabelBarOn				= False
-	res@mpProjection				= "LambertConformal"
-	res@mpLambertParallel1F		= -27.5
-	res@mpLambertParallel2F		= -35.
-	res@mpLambertMeridianF		= 146.1
+
 
 	;###### END OF MY RESOURCES #####
 
@@ -471,15 +497,19 @@ begin
 	pres1                     = True
 	pres1@gsnPanelLabelBar    = True       ; common label bar
 	pres1@gsnFrame            = False      ; don't advance frame yet
-		pres1@lbLabelStride   = stride
+	pres1@gsnMaximize		= True
+	pres1@lbLabelStride   = stride
 	pres1@lbTitleString	= wrf_pres@units
+	
 	pres1@lbTitlePosition			= "Left"
 	pres1@lbTitleDirection		= "Across"
 	pres1@lbTitleFontHeightF		= 0.014
+	pres1@lbLabelFontHeightF = 0.012
 	
-	pres1@vpWidthF=0.55
+	pres1@vpWidthF=0.44
 	pres1@gsnPanelRight =0.6
 	pres1@gsnPanelFigureStrings			= (/"Present","Future"/)
+	pres1@gsnPanelFigureStringsFontHeightF= 0.012
 	gsn_panel(wks,plot,(/1,2/),pres1)
 
 
@@ -494,10 +524,10 @@ begin
 	gsn_reverse_colormap(wks)
 	end if
 	
-	res@cnMinLevelValF		= (/floor(min(min(ind_changes))/2)*2/)			;same manual levels
-	res@cnMaxLevelValF		= (/ceil(max(max(ind_changes))/2)*2/)			;as other plots
-	;res@cnMinLevelValF		= -1.5 
-	;res@cnMaxLevelValF		= 5
+	; res@cnMinLevelValF		= (/floor(min(min(ind_changes))/2)*2/)			;same manual levels
+	; 		res@cnMaxLevelValF		= (/ceil(max(max(ind_changes))/2)*2/)			;as other plots
+	 res@cnMinLevelValF		= -10
+	 res@cnMaxLevelValF		= -2
 	res@cnLevelSpacingF	= spacing_c			;
 	plot2 = gsn_csm_contour_map(wks,ind_changes(:,:),res)
 
@@ -505,16 +535,19 @@ begin
 	pres2                     = True
 	pres2@gsnPanelLabelBar    = True       ; common label bar
 	pres2@gsnFrame            = False      ; don't advance frame yet
+	pres2@gsnMaximize		= True
 	pres2@lbLabelStride   = stride_c 
 	;pres2@lbTitleString	= wrf_pres@units
 	pres2@lbTitlePosition			= "Left"
 	pres2@lbTitleDirection		= "Across"
 	pres2@lbTitleFontHeightF		= 0.014
+	pres2@lbLabelFontHeightF		= 0.012
 
+	pres2@vpWidthF=0.25
 	pres2@gsnPanelLeft  = 0.6
 	pres2@gsnPanelRight = 0.9
 	pres2@gsnPanelFigureStrings			= (/"Changes"/)
-	
+	pres2@gsnPanelFigureStringsFontHeightF= 0.012
 	gsn_panel(wks,plot2,(/1,1/),pres2)
 
 

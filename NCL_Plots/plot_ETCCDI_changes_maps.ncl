@@ -32,7 +32,7 @@ begin
 
 	;---WRF DOMAINS
 
-	index="TX10p"
+	index="TX90p"
 	
 	
 		limit_bot=0.
@@ -46,7 +46,7 @@ begin
 		limit_up=60.
 		spacing=5
 		stride=2
-		spacing_c=2.5
+		spacing_c=5
 		stride_c=2
 		
 	definition="(Tmin>20~S~o~N~C)"
@@ -54,9 +54,9 @@ begin
 	
 	if (index.eq."SU") then
 		limit_up=180.
-		spacing=5.
-		stride=3.
-			spacing_c=2.5
+		spacing=15.
+		stride=2.
+			spacing_c=5
 			stride_c=2
 	definition="(Tmax>25~S~o~N~C)"
 	end if
@@ -526,8 +526,8 @@ begin
 	
 	; res@cnMinLevelValF		= (/floor(min(min(ind_changes))/2)*2/)			;same manual levels
 	; 		res@cnMaxLevelValF		= (/ceil(max(max(ind_changes))/2)*2/)			;as other plots
-	 res@cnMinLevelValF		= -10
-	 res@cnMaxLevelValF		= -2
+	 res@cnMinLevelValF		= 0
+	 res@cnMaxLevelValF		= 90
 	res@cnLevelSpacingF	= spacing_c			;
 	plot2 = gsn_csm_contour_map(wks,ind_changes(:,:),res)
 

@@ -13,14 +13,14 @@
 % email: d.argueso@unsw.edu.au
 %==============================
 
-addpath('/scratch/z3393020/Scripts/ccrc-scripts/Matlab/');
+addpath('~/Scripts/ccrc-scripts/Matlab/');
 
 
 
 
 
-syear=1990;
-eyear=2009;
+syear=2040;
+eyear=2059;
 nyears=eyear-syear+1;
 
 m_clim=monthsyears(syear,eyear);
@@ -31,49 +31,50 @@ nmonths=monthsforave(syear,eyear);
 
 
 %WRF
-%diriwrf='/Users/daniel/Analyses/Sydney2km/Bias_correction/GammaFit/';
-%simid='NNRP_bc_GAUS'
-% ncid=netcdf.open([diriwrf,'CCRC_NARCliM_Sydney_DAM_',int2str(syear),'-',int2str(eyear),'_tasmax_',simid,'.nc'],'NC_NOWRITE');
-% varid=netcdf.inqVarID(ncid,'tasmax_bc');
-% tasmax_WRF=netcdf.getVar(ncid,varid);
-% 
-% ncid=netcdf.open([diriwrf,'CCRC_NARCliM_Sydney_DAM_',int2str(syear),'-',int2str(eyear),'_tasmin_',simid,'.nc'],'NC_NOWRITE');
-% varid=netcdf.inqVarID(ncid,'tasmin_bc');
-% tasmin_WRF=netcdf.getVar(ncid,varid);
-
-
-% filename='~/Analyses/Sydney2km/geo_em_files/geo_em.d03.nc';
-% ncid=netcdf.open(filename,'NC_NOWRITE');
-% varid=netcdf.inqVarID(ncid,'XLAT_M');
-% lat=netcdf.getVar(ncid,varid);
-% varid=netcdf.inqVarID(ncid,'XLONG_M');
-% lon=netcdf.getVar(ncid,varid);;
-%d_sizes=size(tasmax_WRF);
-
-
-%AWAP
-simid='AWAP'
-diriwrfx='/Users/daniel/Analyses/AWAP/Syndey_Region/DAILY/tmax/'
-diriwrfn='/Users/daniel/Analyses/AWAP/Syndey_Region/DAILY/tmin/'
-ncid=netcdf.open([diriwrfx,'tmax.SYD.1990-2009.nc'],'NC_NOWRITE');
-varid=netcdf.inqVarID(ncid,'tmax');
+diriwrf='/Users/daniel/Analyses/Sydney2km/Bias_correction/definitive/';
+[diriwrf,'CCRC_NARCliM_Sydney_DAM_',int2str(syear),'-',int2str(eyear),'_tasmax_',simid,'.nc']
+simid='MK35_bc_GAUS'
+ncid=netcdf.open([diriwrf,'CCRC_NARCliM_Sydney_DAM_',int2str(syear),'-',int2str(eyear),'_tasmax_',simid,'.nc'],'NC_NOWRITE');
+varid=netcdf.inqVarID(ncid,'tasmax_bc');
 tasmax_WRF=netcdf.getVar(ncid,varid);
+
+ncid=netcdf.open([diriwrf,'CCRC_NARCliM_Sydney_DAM_',int2str(syear),'-',int2str(eyear),'_tasmin_',simid,'.nc'],'NC_NOWRITE');
+varid=netcdf.inqVarID(ncid,'tasmin_bc');
+tasmin_WRF=netcdf.getVar(ncid,varid);
+
+
+filename='~/Analyses/Sydney2km/geo_em_files/geo_em.d03.nc';
+ncid=netcdf.open(filename,'NC_NOWRITE');
+varid=netcdf.inqVarID(ncid,'XLAT_M');
+lat=netcdf.getVar(ncid,varid);
+varid=netcdf.inqVarID(ncid,'XLONG_M');
+lon=netcdf.getVar(ncid,varid);;
 d_sizes=size(tasmax_WRF);
 
 
-varid=netcdf.inqVarID(ncid,'lon');
-lon=netcdf.getVar(ncid,varid);
-
-lon=repmat(lon,[1,d_sizes(2)]);
-
-varid=netcdf.inqVarID(ncid,'lat');
-lat=netcdf.getVar(ncid,varid);
-
-lat=repmat(lat,[1,d_sizes(1)])';
-
-ncid=netcdf.open([diriwrfn,'tmin.SYD.1990-2009.nc'],'NC_NOWRITE');
-varid=netcdf.inqVarID(ncid,'tmin');
-tasmin_WRF=netcdf.getVar(ncid,varid);
+%AWAP
+% simid='AWAP'
+% diriwrfx='/Users/daniel/Analyses/AWAP/Syndey_Region/DAILY/tmax/'
+% diriwrfn='/Users/daniel/Analyses/AWAP/Syndey_Region/DAILY/tmin/'
+% ncid=netcdf.open([diriwrfx,'tmax.SYD.1990-2009.nc'],'NC_NOWRITE');
+% varid=netcdf.inqVarID(ncid,'tmax');
+% tasmax_WRF=netcdf.getVar(ncid,varid);
+% d_sizes=size(tasmax_WRF);
+% 
+% 
+% varid=netcdf.inqVarID(ncid,'lon');
+% lon=netcdf.getVar(ncid,varid);
+% 
+% lon=repmat(lon,[1,d_sizes(2)]);
+% 
+% varid=netcdf.inqVarID(ncid,'lat');
+% lat=netcdf.getVar(ncid,varid);
+% 
+% lat=repmat(lat,[1,d_sizes(1)])';
+% 
+% ncid=netcdf.open([diriwrfn,'tmin.SYD.1990-2009.nc'],'NC_NOWRITE');
+% varid=netcdf.inqVarID(ncid,'tmin');
+% tasmin_WRF=netcdf.getVar(ncid,varid);
 
 
 %##################
@@ -126,10 +127,10 @@ netcdf.putAtt(ncid,varidlon,'units',['days since',num2str(syear),'-01-01 00:00:0
 
 
 
-for mtc=1:12
-p90x(:,:,mtc)=prctile(tasmax_WRF(:,:,m_clim==mtc),90,3);
-p90n(:,:,mtc)=prctile(tasmin_WRF(:,:,m_clim==mtc),90,3);
-end
+% for mtc=1:12
+% p90x(:,:,mtc)=prctile(tasmax_WRF(:,:,m_clim==mtc),90,3);
+% p90n(:,:,mtc)=prctile(tasmin_WRF(:,:,m_clim==mtc),90,3);
+% end
 
 
     

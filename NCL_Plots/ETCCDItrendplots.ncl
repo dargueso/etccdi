@@ -20,8 +20,8 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 
 ;************************************************
 begin
-
-indices=(/"CDD","CWD","GSL","PRCPTOT","R20mm","R99p","Rx1day","SDII","TNn","TR","TXn","WSDI","CSDI","DTR","FD","ID","R10mm","R95p","Rx5day","SU","TN10p","TN90p","TNx","TX10p","TX90p","TXx"/)
+indices=(/"Rx5day","R99p","R95p","SDII","TN10p","TX10p","TN90p","TX90p"/)
+;indices=(/"CDD","CWD","GSL","PRCPTOT","R20mm","R99p","Rx1day","SDII","TNn","TR","TXn","WSDI","CSDI","DTR","FD","ID","R10mm","R95p","Rx5day","SU","TN10p","TN90p","TNx","TX10p","TX90p","TXx"/)
 ;indices=(/"TNn","TXn","TXx","Rx1day"/) ;;TNx
 
 
@@ -80,11 +80,11 @@ do ii=0,dimsizes(indices)-1
   data3  = file3->Annual(1:,:,:)
   data4  = file4->Annual(51:109,:,:)
   
-  data5_aux  = file5->Annual(2:61,:,:)
+  data5_aux  = file5->Annual(3:61,:,:)
   data5 = data5_aux(:,{-10.4:-39},{110:156})
   lat5_red = file5->lat({-10.4:-39})
   
-  data6_aux  = file6->Ann(0:59,:,:)
+  data6_aux  = file6->Ann(0:58,:,:)
   data6 = data6_aux(:,{-10.4:-39},{110:156})
   lat6_red = file6->lat({-10.4:-39})
 ;; Masking land
@@ -102,7 +102,7 @@ data3 = mask (data3, conform(data3, landmask, (/1,2/)), 1)
 
   ; 1 array for all timeseries to be plotted
 ;;  yAnn = new ((/4,nyrs/) , float, data_had@_FillValue) 
-  yAnn = new ((/5,nyrs/) , float, data1@_FillValue) 
+  yAnn = new ((/6,nyrs/) , float, data1@_FillValue) 
   yAnn_11yr = yAnn
 
 ; *********************************************
@@ -208,7 +208,7 @@ data3 = mask (data3, conform(data3, landmask, (/1,2/)), 1)
 ;;  yAnn_11yr(3,:) = GHCN_FieldAvg_wgt_11yr2
 
 ;; output table with annual values
-  outmat=new ((/nyrs,6/) , float, data1@_FillValue)
+  outmat=new ((/nyrs,7/) , float, data1@_FillValue)
   outmat(:,0)=yrs
   outmat(:,1)= data1_FieldAvg_wgt
   outmat(:,2)= data2_FieldAvg_wgt
@@ -287,8 +287,8 @@ data3 = mask (data3, conform(data3, landmask, (/1,2/)), 1)
 
   plotfile="/srv/ccrc/data13/z3393020/Analyses/NARCliM/ETCCDI/images/NARCliM_"+index+".png"
   wks_type = "png"
-  wks_type@wkWidth = 800
-  wks_type@wkHeight = 600
+  wks_type@wkWidth = 1600
+  wks_type@wkHeight = 1200
   wks = gsn_open_wks(wks_type,plotfile)
 
 ; **********************************************
@@ -298,12 +298,12 @@ data3 = mask (data3, conform(data3, landmask, (/1,2/)), 1)
  res@gsnDraw           = False         ; Don't draw plots (for overlay)
  res@gsnFrame          = False         ; don't advance frame yet
 
- res@tiMainString      = "Area Average AUS"+index+" "   ; add title
+ res@tiMainString      = "Australia Area Average "+index+" "   ; add title
  
  res@gsnMaximize   =True
- res@vpHeightF= 0.4                    ; change aspect ratio of plot
- res@vpWidthF = 0.8
- res@vpXF     = 0.1                   ; start plot at x ndc coord
+ res@vpHeightF= 0.6                    ; change aspect ratio of plot
+ res@vpWidthF = 0.9
+ res@vpXF     = 0.05                   ; start plot at x ndc coord
 
 ;; res@gsnYRefLine           = 0.0             ; create a reference line  
 
@@ -325,7 +325,7 @@ data3 = mask (data3, conform(data3, landmask, (/1,2/)), 1)
   sres = True                                 ; set up a second resource list
   sres@gsnDraw = False                        ; do not draw the plot
   sres@gsnFrame = False                       ; do not advance the frame
-
+  
   sres@xyLineThicknesses = (/3.0,3.0,3.0,3.0/)
   sres@xyDashPattern = 0               ; dashed/solid(=0)
 
@@ -342,7 +342,7 @@ data3 = mask (data3, conform(data3, landmask, (/1,2/)), 1)
   sres@pmLegendParallelPosF   = .13 ;.2                  ; move units right
   sres@pmLegendOrthogonalPosF = -0.42 ;-0.45                ; move units down
   sres@pmLegendWidthF         = 0.08                ; Change width and
-  sres@pmLegendHeightF        = 0.11 ;0.13                ; height of legend.
+  sres@pmLegendHeightF        = 0.15 ;0.13                ; height of legend.
   sres@lgLabelFontHeightF     = .012                   ; change font height
   sres@lgPerimOn              = False                 ; no box around
 

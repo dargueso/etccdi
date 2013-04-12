@@ -124,18 +124,18 @@ do ii=0,dimsizes(indices)-1
   ; *********************************************
 
   ; set data to missing on gridboxes where <40 years of data
-     nomiss_dat1=dim_num_n(.not.ismissing(data1),0)  ; count missing values at each location
-     data1 = mask( data1, (nomiss_dat1.ge.40), True)  ; mask
-     nomiss_dat2=dim_num_n(.not.ismissing(data2),0)  ; count missing values at each location
-     data2 = mask( data2, (nomiss_dat2.ge.40), True)  ; mask
-     nomiss_dat3=dim_num_n(.not.ismissing(data3),0)  ; count missing values at each location
-     data3 = mask( data3, (nomiss_dat3.ge.40), True)  ; mask
-     nomiss_dat4=dim_num_n(.not.ismissing(data4),0)  ; count missing values at each location
-     data4 = mask( data4, (nomiss_dat4.ge.40), True)  ; mask
-     nomiss_dat5=dim_num_n(.not.ismissing(data5),0)  ; count missing values at each location
-     data5 = mask( data5, (nomiss_dat5.ge.40), True)  ; mask
-     nomiss_dat6=dim_num_n(.not.ismissing(data6),0)  ; count missing values at each location
-     data6 = mask( data6, (nomiss_dat6.ge.40), True)  ; mask
+     ; nomiss_dat1=dim_num_n(.not.ismissing(data1),0)  ; count missing values at each location
+     ; data1 = mask( data1, (nomiss_dat1.ge.40), True)  ; mask
+     ; nomiss_dat2=dim_num_n(.not.ismissing(data2),0)  ; count missing values at each location
+     ; data2 = mask( data2, (nomiss_dat2.ge.40), True)  ; mask
+     ; nomiss_dat3=dim_num_n(.not.ismissing(data3),0)  ; count missing values at each location
+     ; data3 = mask( data3, (nomiss_dat3.ge.40), True)  ; mask
+     ; nomiss_dat4=dim_num_n(.not.ismissing(data4),0)  ; count missing values at each location
+     ; data4 = mask( data4, (nomiss_dat4.ge.40), True)  ; mask
+     ; nomiss_dat5=dim_num_n(.not.ismissing(data5),0)  ; count missing values at each location
+     ; data5 = mask( data5, (nomiss_dat5.ge.40), True)  ; mask
+     ; nomiss_dat6=dim_num_n(.not.ismissing(data6),0)  ; count missing values at each location
+     ; data6 = mask( data6, (nomiss_dat6.ge.40), True)  ; mask
 
 
 

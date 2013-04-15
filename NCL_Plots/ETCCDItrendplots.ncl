@@ -19,15 +19,42 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 
 ;************************************************
+;************************************************
+undef("calc_trend")
+function calc_trend (data,index)
+local x,tval,nxy,numyrs,b
+begin
+    x = ispan(0,dimsizes(data)-1,1)*1.
+    ;count the number of non-missing (annual) values at each location
+    numyrs = dim_num_n(.not.ismissing(data),0)
+    tval = new(1,float,1e20)
+    nxy = new(1,integer)
+    rc = regcoef (x,data,tval,nxy)
+    rc@long_name = "linear Trend "+index
+    rc=where(numyrs.lt.30,rc@_FillValue,rc)
+    
+    b = tval
+    b = 0.5
+    prob  = betainc(nxy/(nxy+tval^2),nxy/2.0,b)
+    prob@_FillValue=1e20
+    ; set prob to missing where rc is missing (result otherwise 0)
+    prob=where(ismissing(rc),rc,prob) 
+    return(/rc,prob/)
+end
+
+
 begin
 indices=(/"Rx5day","R99p","R95p","SDII","TN10p","TX10p","TN90p","TX90p"/)
 ;indices=(/"CDD","CWD","GSL","PRCPTOT","R20mm","R99p","Rx1day","SDII","TNn","TR","TXn","WSDI","CSDI","DTR","FD","ID","R10mm","R95p","Rx5day","SU","TN10p","TN90p","TNx","TX10p","TX90p","TXx"/)
 ;indices=(/"TNn","TXn","TXx","Rx1day"/) ;;TNx
+;indices=("TN10p") 
 
-
-geof_file=addfile("/srv/ccrc/data13/z3393020/Analyses/Sydney2km/geo_em_files/geo_em.d01.narclim.nc","r")
-landmask=geof_file->LANDMASK(0,:,:)
-lat2d=geof_file->XLAT_M(0,:,:)
+geof=addfile("/srv/ccrc/data13/z3393020/Analyses/Sydney2km/geo_em_files/geo_em.d01.narclim.AUS_ONLY.nc","r")
+landmask=geof->LANDMASK(0,:,:)
+lat2d=geof->XLAT_M(0,:,:)
+lon2d=geof->XLONG_M(0,:,:)
+nlat  = dimsizes(lat2d(:,0))
+nlon  = dimsizes(lon2d(0,:))
 
 do ii=0,dimsizes(indices)-1
   index=indices(ii)
@@ -42,60 +69,89 @@ do ii=0,dimsizes(indices)-1
    delete(data1_FieldAvg_wgt_11yr)
   end if
 
-   DATADIR1="/scratch/z3393020/ETCCDI/fclimdex_RCM/index/"
-   INDAT1=DATADIR1+"CCRC_NARCliM_NNRP_R1_1950-2009_"+index+".nc"
-   DATADIR2="/scratch/z3393020/ETCCDI/fclimdex_RCM_R2/index/"
-   INDAT2=DATADIR2+"CCRC_NARCliM_NNRP_R2_1950-2009_"+index+".nc"
-   DATADIR3="/scratch/z3393020/ETCCDI/fclimdex_RCM_R3/index/"
-   INDAT3=DATADIR3+"CCRC_NARCliM_NNRP_R3_1950-2009_"+index+".nc"
-   ;AWAP
-   DATADIR4="/srv/ccrc/data07/z3356123/AWAP_out/indices/fclimdex/0.5deg/"
-   INDAT4=DATADIR4+"AWAP_1900-2011_"+index+".nc"
+  
+  DATADIR1="/scratch/z3393020/ETCCDI/fclimdex_RCM/index/"
+  INDAT1=DATADIR1+"CCRC_NARCliM_NNRP_R1_1950-2009_"+index+".nc"
+  DATADIR2="/scratch/z3393020/ETCCDI/fclimdex_RCM_R2/index/"
+  INDAT2=DATADIR2+"CCRC_NARCliM_NNRP_R2_1950-2009_"+index+".nc"
+  DATADIR3="/scratch/z3393020/ETCCDI/fclimdex_RCM_R3/index/"
+  INDAT3=DATADIR3+"CCRC_NARCliM_NNRP_R3_1950-2009_"+index+".nc"
+  ;AWAP
+  DATADIR4="/srv/ccrc/data07/z3356123/AWAP_out/indices/fclimdex/0.5deg/"
+  INDAT4=DATADIR4+"AWAP_1900-2011_"+index+".nc"
+  MASK4=DATADIR4+"AWAP_1900-2011_R99p.nc"
+  filemask4=addfile(MASK4,"r")
+  latAWAP=filemask4->lat
+  lonAWAP=filemask4->lon
+  maskWA=filemask4->Annual(30,:,:)
+  maskWA=where(.not.ismissing(maskWA),1,maskWA)
+  maskWA=where(ismissing(maskWA),0,maskWA)
    
-   ;NCEP 1
-   DATADIR5="/srv/ccrc/data03/z3356123/NCEP1/fclimdex/indices_Jan2012/"
-   INDAT5=DATADIR5+"NCEP_1948-2011_"+index+"_LSmask.nc"
-   
-   ;GHCNDEX
+   maskWA_WRF=rgrid2rcm(latAWAP(::-1),lonAWAP,maskWA(::-1,:),lat2d,lon2d,1)
 
-   DATADIR6="/srv/ccrc/data07/z3356123/GHCNDEX_2012/ghcndex/gridout/GHCNDEX_2.5x2.5deg/"
-   INDAT6=DATADIR6+"GHCND_"+index+"_1951-2013_RegularGrid_global_2.5x2.5deg_LSmask.nc"
+  ;HadEX2
+  DATADIR5="/srv/ccrc/data03/z3356123/HadEX2/HadEX2_3.75x2.5deg/"
+  INDAT5=DATADIR5+"H2_"+index+"_1901-2010_RegularGrid_global_3.75x2.5deg_LSmask.nc"
+
+  ; ;GHCNDEX
+  ;  DATADIR5="/srv/ccrc/data07/z3356123/GHCNDEX_2012/ghcndex/gridout/GHCNDEX_2.5x2.5deg/"
+  ;  INDAT5=DATADIR5+"GHCND_"+index+"_1951-2013_RegularGrid_global_2.5x2.5deg_LSmask.nc"
+  
+  ;NCEP 1
+  DATADIR6="/srv/ccrc/data03/z3356123/NCEP1/fclimdex/indices_Jan2012/"
+  INDAT6=DATADIR6+"NCEP_1948-2011_"+index+"_LSmask.nc"
+
    
 ;;;;;;;
 ;; fill up with e.g. diferent resolutions/parameters/...
 
 
-  nyrs = 2009-1951+1
-  yrs=ispan(1951,2009,1)
+syear=1951
+eyear=2009
+nyrs = eyear-syear+1
+yrs=ispan(syear,eyear,1)
+x = ispan(0,nyrs-1,1)
 
-  file1  = addfile(INDAT1,"r")
-  file2  = addfile(INDAT2,"r")
-  file3  = addfile(INDAT3,"r")
-  file4  = addfile(INDAT4,"r") ;AWAP
-  file5  = addfile(INDAT5,"r") ;NCEP1
-  file6  = addfile(INDAT6,"r")    ;GHCNDEX
+sy_NARCliM=syear-1950
+sy_AWAP=syear-1900
+sy_NNRP=syear-1948
+;sy_GHCN=syear-1951
+sy_GHCN=syear-1901 ;HadEX2
 
-  data1  = file1->Annual(1:,:,:)
-  data2  = file2->Annual(1:,:,:)
-  data3  = file3->Annual(1:,:,:)
-  data4  = file4->Annual(51:109,:,:)
-  
-  data5_aux  = file5->Annual(3:61,:,:)
-  data5 = data5_aux(:,{-10.4:-39},{110:156})
-  lat5_red = file5->lat({-10.4:-39})
-  
-  data6_aux  = file6->Ann(0:58,:,:)
-  data6 = data6_aux(:,{-10.4:-39},{110:156})
-  lat6_red = file6->lat({-10.4:-39})
+file1  = addfile(INDAT1,"r")
+ file2  = addfile(INDAT2,"r")
+ file3  = addfile(INDAT3,"r")
+ file4  = addfile(INDAT4,"r") ;AWAP
+ file5  = addfile(INDAT5,"r") ;GHCNDEX or HadEX2
+ file6  = addfile(INDAT6,"r");NCEP1
+ 
+
+ 
+
+ data1  = file1->Annual(sy_NARCliM:sy_NARCliM+nyrs-1,:,:)
+ data2  = file2->Annual(sy_NARCliM:sy_NARCliM+nyrs-1,:,:)
+ data3  = file3->Annual(sy_NARCliM:sy_NARCliM+nyrs-1,:,:)
+ data4  = file4->Annual(sy_AWAP:sy_AWAP+nyrs-1,:,:)
+ 
+ data5_aux  = file5->Ann(sy_GHCN:sy_GHCN+nyrs-1,:,:)
+ data5 = data5_aux(:,{-10.4:-39},{110:156})
+ lat5_red = file5->lat({-10.4:-39})
+   
+ data6_aux  = file6->Annual(sy_NNRP:sy_NNRP+nyrs-1,:,:)
+ data6 = data6_aux(:,{-10.4:-39},{110:156})
+ lat6_red = file6->lat({-10.4:-39})
+
 ;; Masking land
 
-printVarSummary(landmask)
-printVarSummary(data1)
+; printVarSummary(landmask)
+; printVarSummary(data1)
 
-data1 = mask (data1, conform(data1, landmask, (/1,2/)), 1)  
-data2 = mask (data2, conform(data2, landmask, (/1,2/)), 1)  
-data3 = mask (data3, conform(data3, landmask, (/1,2/)), 1)   
-  
+
+data1 = mask (data1, conform(data1, landmask*maskWA_WRF, (/1,2/)), 1)  
+data2 = mask (data2, conform(data2, landmask*maskWA_WRF, (/1,2/)), 1)  
+data3 = mask (data3, conform(data3, landmask*maskWA_WRF, (/1,2/)), 1)
+data4 = mask (data4, conform(data4, maskWA  , (/1,2/)), 1)
+
 ;;;;;;;
 ;; fill up for additional infiles
 
@@ -108,12 +164,12 @@ data3 = mask (data3, conform(data3, landmask, (/1,2/)), 1)
 ; *********************************************
 
 ; set data to missing on gridboxes where <40 years of data
-   nomiss_dat1=dim_num_n(.not.ismissing(data1),0)  ; count missing values at each location
-   data1 = mask( data1, (nomiss_dat1.ge.40), True)  ; mask
-   nomiss_dat2=dim_num_n(.not.ismissing(data2),0)  ; count missing values at each location
-   data2 = mask( data2, (nomiss_dat2.ge.40), True)  ; mask
-   nomiss_dat3=dim_num_n(.not.ismissing(data3),0)  ; count missing values at each location
-   data3 = mask( data3, (nomiss_dat3.ge.40), True)  ; mask
+   ; nomiss_dat1=dim_num_n(.not.ismissing(data1),0)  ; count missing values at each location
+   ;  data1 = mask( data1, (nomiss_dat1.ge.40), True)  ; mask
+   ;  nomiss_dat2=dim_num_n(.not.ismissing(data2),0)  ; count missing values at each location
+   ;  data2 = mask( data2, (nomiss_dat2.ge.40), True)  ; mask
+   ;  nomiss_dat3=dim_num_n(.not.ismissing(data3),0)  ; count missing values at each location
+   ;  data3 = mask( data3, (nomiss_dat3.ge.40), True)  ; mask
    nomiss_dat4=dim_num_n(.not.ismissing(data4),0)  ; count missing values at each location
    data4 = mask( data4, (nomiss_dat4.ge.40), True)  ; mask
    
@@ -220,7 +276,8 @@ data3 = mask (data3, conform(data3, landmask, (/1,2/)), 1)
   fmtf   = "f5.0,1x,3f10.2"
   opt = True
 ;;  opt@title  = "Year      HadEX     HadGHCN   GHCNDEX"
-  opt@title  = "Year      R1        R2      R3      AWAP        NCEP    GHCN"
+  ; opt@title  = "Year      R1        R2      R3      AWAP    GHCN    NCEP"
+  opt@title  = "Year      R1        R2      R3      AWAP    HadEX2    NCEP"
   opt@fout = "/srv/ccrc/data13/z3393020/Analyses/NARCliM/ETCCDI/NARCliM_"+index+".txt"
   write_matrix (outmat, fmtf, opt)
 
@@ -228,60 +285,24 @@ data3 = mask (data3, conform(data3, landmask, (/1,2/)), 1)
 ; *****************************************************
 ; *** Trend calculation (of *FieldAvg_wgt)
 
-  y = data1_FieldAvg_wgt
-  x = ispan(0,dimsizes(y)-1,1)*1.
-  rc   = regline (x,y)
-  df   = rc@nptxy-2
-  prob = (1 - betainc(df/(df+rc@tval^2), df/2.0, 0.5) )
-  print ("Trend (decadal) "+index+" Data1= "+rc*10+" (p="+prob+")")
-  delete(x)
-  delete(y)
+rc_prob=calc_trend(data1_FieldAvg_wgt,index) 
+print ("Trend (decadal) "+index+" Data1= "+rc_prob(0)*10+" (p="+rc_prob(1)+")")
 
-  y = data2_FieldAvg_wgt
-  x = ispan(0,dimsizes(y)-1,1)*1.
-  rc   = regline (x,y)
-  df   = rc@nptxy-2
-  prob = (1 - betainc(df/(df+rc@tval^2), df/2.0, 0.5) )
-  print ("Trend (decadal) "+index+" Data2= "+rc*10+" (p="+prob+")")
-  delete(x)
-  delete(y)
-  
-  y = data3_FieldAvg_wgt
-  x = ispan(0,dimsizes(y)-1,1)*1.
-  rc   = regline (x,y)
-  df   = rc@nptxy-2
-  prob = (1 - betainc(df/(df+rc@tval^2), df/2.0, 0.5) )
-  print ("Trend (decadal) "+index+" Data3= "+rc*10+" (p="+prob+")")
-  delete(x)
-  delete(y)
-  
-  y = data4_FieldAvg_wgt
-  x = ispan(0,dimsizes(y)-1,1)*1.
-  rc   = regline (x,y)
-  df   = rc@nptxy-2
-  prob = (1 - betainc(df/(df+rc@tval^2), df/2.0, 0.5) )
-  print ("Trend (decadal) "+index+" Data4= "+rc*10+" (p="+prob+")")
-  delete(x)
-  delete(y)
-  
-  y = data5_FieldAvg_wgt
-  x = ispan(0,dimsizes(y)-1,1)*1.
-  rc   = regline (x,y)
-  df   = rc@nptxy-2
-  prob = (1 - betainc(df/(df+rc@tval^2), df/2.0, 0.5) )
-  print ("Trend (decadal) "+index+" Data5= "+rc*10+" (p="+prob+")")
-  delete(x)
-  delete(y)
+rc_prob=calc_trend(data2_FieldAvg_wgt,index) 
+print ("Trend (decadal) "+index+" Data2= "+rc_prob(0)*10+" (p="+rc_prob(1)+")")
 
-  y = data6_FieldAvg_wgt
-  x = ispan(0,dimsizes(y)-1,1)*1.
-  rc   = regline (x,y)
-  df   = rc@nptxy-2
-  prob = (1 - betainc(df/(df+rc@tval^2), df/2.0, 0.6) )
-  print ("Trend (decadal) "+index+" Data6= "+rc*10+" (p="+prob+")")
-  delete(x)
-  delete(y)
-  
+rc_prob=calc_trend(data3_FieldAvg_wgt,index) 
+print ("Trend (decadal) "+index+" Data3= "+rc_prob(0)*10+" (p="+rc_prob(1)+")")
+
+rc_prob=calc_trend(data4_FieldAvg_wgt,index) 
+print ("Trend (decadal) "+index+" Data4= "+rc_prob(0)*10+" (p="+rc_prob(1)+")")
+
+rc_prob=calc_trend(data5_FieldAvg_wgt,index) 
+print ("Trend (decadal) "+index+" Data5= "+rc_prob(0)*10+" (p="+rc_prob(1)+")")
+   
+rc_prob=calc_trend(data6_FieldAvg_wgt,index) 
+print ("Trend (decadal) "+index+" Data6= "+rc_prob(0)*10+" (p="+rc_prob(1)+")")   
+
 ; ********************************************
 ; Plot Annual Values and smoothed line as Overlay...
 
@@ -309,8 +330,8 @@ data3 = mask (data3, conform(data3, landmask, (/1,2/)), 1)
 
  res@xyLineThicknesses = 0.5
  res@xyDashPattern = 1               ; dashed/solid(=0)
- res@trXMinF = 1950		; set minimum X-axis value
- res@trXMaxF = 2009		; set maximum X-axis value
+ res@trXMinF = 1950       ; set minimum X-axis value
+ res@trXMaxF = 2009       ; set maximum X-axis value
 
 
 ; res@xyLineColors      = (/"black","blue","red","green","purple","orange"/)
@@ -332,7 +353,8 @@ data3 = mask (data3, conform(data3, landmask, (/1,2/)), 1)
 ; Legend with thick lines from smoothed curves
   sres@pmLegendDisplayMode    = "Always"   ; Display a legend.
 ;  LegendText= grids+" deg, m="+slopes
-  sres@xyExplicitLegendLabels = (/"R1","R2","R3","AWAP","NCEP1","GHCN"/)
+;  sres@xyExplicitLegendLabels = (/"R1","R2","R3","AWAP","GHCN","NCEP1"/)
+  sres@xyExplicitLegendLabels = (/"R1","R2","R3","AWAP","HadEX2","NCEP1"/)
 ;  sres@xyExplicitLegendLabels = LegendText
   ;sres@lgItemOrder  = (/ 3,2,1,0 /)   ; Reorder the legends
   sres@lgItemOrder  = (/ 1,0 /)   ; Reorder the legends

@@ -75,17 +75,18 @@ if (is_thresfile) then
 	flgtn=0
     flgtx=0
 file_thres="thresholds.nc"
+
+
 call err_handle(nf90_open(file_thres,NF90_nowrite,ncidt), 'open file')
 
-
 call err_handle(NF90_INQ_VARID (ncidt, "thresan10", ID_varn10),'inquire thresan10 var ID')
-
 call err_handle(NF90_get_var(ncidt,ID_varn10,thresan10,start=(/lon_i,lat_j,1/),count=(/1,1,DoY/)),'get Var thresan10')
+
 
 call err_handle(NF90_INQ_VARID (ncidt, "thresan50", ID_varn50),'inquire thresan50 var ID')
 call err_handle(NF90_get_var(ncidt,ID_varn50,thresan50,start=(/lon_i,lat_j,1/),count=(/1,1,DoY/)),'get Var thresan50')
 
-call err_handle(NF90_INQ_VARID (ncidt, "thresan50", ID_varn90),'inquire thresan90 var ID')
+call err_handle(NF90_INQ_VARID (ncidt, "thresan90", ID_varn90),'inquire thresan90 var ID')
 call err_handle(NF90_get_var(ncidt,ID_varn90,thresan90,start=(/lon_i,lat_j,1/),count=(/1,1,DoY/)),'get Var thresan90')
 
 

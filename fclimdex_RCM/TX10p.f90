@@ -209,32 +209,53 @@ end if
             if(month.ne.2.or.day.ne.29) nn=nn+1
             cnt=cnt+1
             if(nomiss(TMAX(cnt)))then
-              if(year.lt.BASESYEAR.or.year.gt.BASEEYEAR) then
-                if(TMAX(cnt).gt.thresax90(nn)) tx90out(i,month)= tx90out(i,month)+1
-                if(TMAX(cnt).gt.thresax50(nn)) tx50out(i,month)= tx50out(i,month)+1
-                if(TMAX(cnt).lt.thresax10(nn)) tx10out(i,month)= tx10out(i,month)+1
-              else
-                do iter=1,BYRS-1
+                
+              if (.not. is_thresfile) then
+                  if(year.lt.BASESYEAR.or.year.gt.BASEEYEAR) then
+                      if(TMAX(cnt).gt.thresax90(nn)) tx90out(i,month)= tx90out(i,month)+1
+                      if(TMAX(cnt).gt.thresax50(nn)) tx50out(i,month)= tx50out(i,month)+1
+                      if(TMAX(cnt).lt.thresax10(nn)) tx10out(i,month)= tx10out(i,month)+1
+                  else
+                      do iter=1,BYRS-1
 
-                  if(TMAX(cnt).gt.thresbx90(nn,byear,iter))   tx90out(i,month)=tx90out(i,month)+1
-                  if(TMAX(cnt).gt.thresbx50(nn,byear,iter))   tx50out(i,month)=tx50out(i,month)+1
-                  if(TMAX(cnt).lt.thresbx10(nn,byear,iter))   tx10out(i,month)=tx10out(i,month)+1
-                enddo
-              endif
+                        if(TMAX(cnt).gt.thresbx90(nn,byear,iter))   tx90out(i,month)=tx90out(i,month)+1
+                        if(TMAX(cnt).gt.thresbx50(nn,byear,iter))   tx50out(i,month)=tx50out(i,month)+1
+                        if(TMAX(cnt).lt.thresbx10(nn,byear,iter))   tx10out(i,month)=tx10out(i,month)+1
+                      enddo
+                  endif
+              else
+                  if(TMAX(cnt).gt.thresax90(nn)) tx90out(i,month)= tx90out(i,month)+1
+                  if(TMAX(cnt).gt.thresax50(nn)) tx50out(i,month)= tx50out(i,month)+1
+                  if(TMAX(cnt).lt.thresax10(nn)) tx10out(i,month)= tx10out(i,month)+1
+              end if
+              
+              
             else
               missxcnt=missxcnt+1
             endif
+            
+            
+            
+            
             if(nomiss(TMIN(cnt)))then
-              if(year.lt.BASESYEAR.or.year.gt.BASEEYEAR) then
-                if(TMIN(cnt).gt.thresan90(nn)) tn90out(i,month)= tn90out(i,month)+1
-                if(TMIN(cnt).gt.thresan50(nn)) tn50out(i,month)= tn50out(i,month)+1
-                if(TMIN(cnt).lt.thresan10(nn)) tn10out(i,month)= tn10out(i,month)+1
+              if (.not. is_thresfile) then
+                  
+                  if(year.lt.BASESYEAR.or.year.gt.BASEEYEAR) then
+                    if(TMIN(cnt).gt.thresan90(nn)) tn90out(i,month)= tn90out(i,month)+1
+                    if(TMIN(cnt).gt.thresan50(nn)) tn50out(i,month)= tn50out(i,month)+1
+                    if(TMIN(cnt).lt.thresan10(nn)) tn10out(i,month)= tn10out(i,month)+1
+                  else
+                    do iter=1,BYRS-1
+                      if(TMIN(cnt).gt.thresbn90(nn,byear,iter))  tn90out(i,month)=tn90out(i,month)+1
+                      if(TMIN(cnt).gt.thresbn50(nn,byear,iter))  tn50out(i,month)=tn50out(i,month)+1
+                      if(TMIN(cnt).lt.thresbn10(nn,byear,iter))  tn10out(i,month)=tn10out(i,month)+1
+                    enddo
+                  endif
+                
               else
-                do iter=1,BYRS-1
-                  if(TMIN(cnt).gt.thresbn90(nn,byear,iter))  tn90out(i,month)=tn90out(i,month)+1
-                  if(TMIN(cnt).gt.thresbn50(nn,byear,iter))  tn50out(i,month)=tn50out(i,month)+1
-                  if(TMIN(cnt).lt.thresbn10(nn,byear,iter))  tn10out(i,month)=tn10out(i,month)+1
-                enddo
+                    if(TMIN(cnt).gt.thresan90(nn)) tn90out(i,month)= tn90out(i,month)+1
+                    if(TMIN(cnt).gt.thresan50(nn)) tn50out(i,month)= tn50out(i,month)+1
+                    if(TMIN(cnt).lt.thresan10(nn)) tn10out(i,month)= tn10out(i,month)+1
               endif
             else
               missncnt=missncnt+1

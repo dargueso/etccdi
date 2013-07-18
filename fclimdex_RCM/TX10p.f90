@@ -154,14 +154,14 @@ if (.not. is_thresfile) then
               if(flgtx.eq.0) txboot(i,:)=txboot(iter,:)
               if(flgtn.eq.0) tnboot(i,:)=tnboot(iter,:)
             if(flgtx.eq.0)then
-              call threshold(txboot,rlevs,3,threstmp,flg)
+              call threshold(txboot,rlevs,3,threstmp,flgtx)
                 thresbx90(:,i,nn)=threstmp(:,3)+1e-5
                 thresbx50(:,i,nn)=threstmp(:,2)+1e-5
                 thresbx10(:,i,nn)=threstmp(:,1)-1e-5
             endif
 
             if(flgtn.eq.0) then
-              call threshold(tnboot,rlevs,3,threstmp,flg)
+              call threshold(tnboot,rlevs,3,threstmp,flgtn)
                 thresbn90(:,i,nn)=threstmp(:,3)+1e-5
                 thresbn50(:,i,nn)=threstmp(:,2)+1e-5
                 thresbn10(:,i,nn)=threstmp(:,1)-1e-5

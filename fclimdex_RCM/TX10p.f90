@@ -109,17 +109,13 @@ else
         thresan10(:)=threstmp(:,1)-1e-5
         thresan50(:)=threstmp(:,2)+1e-5
         thresan90(:)=threstmp(:,3)+1e-5
-!      thresan10=thresan10-1e-5
+
       if(flgtn.eq.1) then
-!        write(6,*) "TMIN Missing value overflow in exceedance rate"
+
         tn10out=MISSING
         tn50out=MISSING
         tn90out=MISSING
-!      else
-!        call threshold(tndata,.5,thresan50, flgtn)
-!        thresan50=thresan50+1e-5
-!        call threshold(tndata,.9,thresan90, flgtn)
-!        thresan90=thresan90+1e-5
+
       endif
 
 !MD      call threshold(txdata,.1,thresax10, flgtx)
@@ -127,17 +123,12 @@ else
         thresax10(:)=threstmp(:,1)-1e-5
         thresax50(:)=threstmp(:,2)+1e-5
         thresax90(:)=threstmp(:,3)+1e-5
-!      thresax10=thresax10-1e-5
+
       if(flgtx.eq.1) then
- !       write(6,*) "TMAX Missing value overflow in exceedance rate"
+
         tx10out=MISSING
         tx50out=MISSING
         tx90out=MISSING
-!      else
-!        call threshold(txdata,.5,thresax50, flgtx)
-!        thresax50=thresax50+1e-5
-!        call threshold(txdata,.9,thresax90, flgtx)
-!        thresax90=thresax90+1e-5
       endif
 
 endif
@@ -163,14 +154,14 @@ if (.not. is_thresfile) then
               if(flgtx.eq.0) txboot(i,:)=txboot(iter,:)
               if(flgtn.eq.0) tnboot(i,:)=tnboot(iter,:)
             if(flgtx.eq.0)then
-              call threshold(txboot,rlevs,3,threstmp,flg)
+              call threshold(txboot,rlevs,3,threstmp,flgtx)
                 thresbx90(:,i,nn)=threstmp(:,3)+1e-5
                 thresbx50(:,i,nn)=threstmp(:,2)+1e-5
                 thresbx10(:,i,nn)=threstmp(:,1)-1e-5
             endif
 
             if(flgtn.eq.0) then
-              call threshold(tnboot,rlevs,3,threstmp,flg)
+              call threshold(tnboot,rlevs,3,threstmp,flgtn)
                 thresbn90(:,i,nn)=threstmp(:,3)+1e-5
                 thresbn50(:,i,nn)=threstmp(:,2)+1e-5
                 thresbn10(:,i,nn)=threstmp(:,1)-1e-5
@@ -262,12 +253,8 @@ end if
             endif
           enddo ! do day=1,kth
 
-!          if(year.ge.BASESYEAR.and.year.le.BASEEYEAR)then
-!            print *, year,month,tx10out(i,month),tx90out(i,month),	&
-!             tn10out(i,month),tn90out(i,month),missxcnt,missncnt
-!          endif
 
-          if(year.ge.BASESYEAR.and.year.le.BASEEYEAR)then
+          if(year.ge.BASESYEAR.and.year.le.BASEEYEAR .and. .not. is_thresfile)then
             tn90out(i,month)=tn90out(i,month)/BYRSm
             tn50out(i,month)=tn50out(i,month)/BYRSm
             tn10out(i,month)=tn10out(i,month)/BYRSm

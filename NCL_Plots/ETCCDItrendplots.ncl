@@ -44,12 +44,12 @@ end
 
 
 begin
-indices=(/"Rx5day","R99p","R95p","SDII","TN10p","TX10p","TN90p","TX90p"/)
-;indices=(/"CDD","CWD","GSL","PRCPTOT","R20mm","R99p","Rx1day","SDII","TNn","TR","TXn","WSDI","CSDI","DTR","FD","ID","R10mm","R95p","Rx5day","SU","TN10p","TN90p","TNx","TX10p","TX90p","TXx"/)
+;indices=(/"TNx"/)
+indices=(/"CDD","CWD","GSL","PRCPTOT","R20mm","R99p","Rx1day","SDII","TNn","TR","TXn","WSDI","CSDI","DTR","FD","ID","R10mm","R95p","Rx5day","SU","TN10p","TN90p","TNx","TX10p","TX90p","TXx"/)
 ;indices=(/"TNn","TXn","TXx","Rx1day"/) ;;TNx
 ;indices=("TN10p") 
 
-geof=addfile("/srv/ccrc/data13/z3393020/Analyses/Sydney2km/geo_em_files/geo_em.d01.narclim.AUS_ONLY.nc","r")
+geof=addfile("/srv/ccrc/data13/z3393020/Analyses/share/geo_em_files/geo_em.d01.narclim.AUS_ONLY.nc","r")
 landmask=geof->LANDMASK(0,:,:)
 lat2d=geof->XLAT_M(0,:,:)
 lon2d=geof->XLONG_M(0,:,:)
@@ -69,13 +69,18 @@ do ii=0,dimsizes(indices)-1
    delete(data1_FieldAvg_wgt_11yr)
   end if
 
-  
-  DATADIR1="/scratch/z3393020/ETCCDI/fclimdex_RCM/index/"
-  INDAT1=DATADIR1+"CCRC_NARCliM_NNRP_R1_1950-2009_"+index+".nc"
-  DATADIR2="/scratch/z3393020/ETCCDI/fclimdex_RCM_R2/index/"
-  INDAT2=DATADIR2+"CCRC_NARCliM_NNRP_R2_1950-2009_"+index+".nc"
-  DATADIR3="/scratch/z3393020/ETCCDI/fclimdex_RCM_R3/index/"
-  INDAT3=DATADIR3+"CCRC_NARCliM_NNRP_R3_1950-2009_"+index+".nc"
+    DATADIR1="/home/z3393020//Analyses/NARCliM/ETCCDI/indices/R1/NNRP/Bias_corrected/"
+  INDAT1=DATADIR1+"CCRC_NARCliM_NNRP_R1_bc_1950-2009_"+index+".nc"
+  DATADIR2="/home/z3393020//Analyses/NARCliM/ETCCDI/indices/R2/NNRP/Bias_corrected/"
+  INDAT2=DATADIR2+"CCRC_NARCliM_NNRP_R2_bc_1950-2009_"+index+".nc"
+  DATADIR3="/home/z3393020//Analyses/NARCliM/ETCCDI/indices/R3/NNRP/Bias_corrected/"
+  INDAT3=DATADIR3+"CCRC_NARCliM_NNRP_R3_bc_1950-2009_"+index+".nc" 
+  ;DATADIR1="/scratch/z3393020/ETCCDI/fclimdex_RCM/index/"
+  ;INDAT1=DATADIR1+"CCRC_NARCliM_NNRP_R1_1950-2009_"+index+".nc"
+  ;DATADIR2="/scratch/z3393020/ETCCDI/fclimdex_RCM_R2/index/"
+  ;INDAT2=DATADIR2+"CCRC_NARCliM_NNRP_R2_1950-2009_"+index+".nc"
+  ;DATADIR3="/scratch/z3393020/ETCCDI/fclimdex_RCM_R3/index/"
+  ;INDAT3=DATADIR3+"CCRC_NARCliM_NNRP_R3_1950-2009_"+index+".nc"
   ;AWAP
   DATADIR4="/srv/ccrc/data07/z3356123/AWAP_out/indices/fclimdex/0.5deg/"
   INDAT4=DATADIR4+"AWAP_1900-2011_"+index+".nc"
@@ -90,12 +95,13 @@ do ii=0,dimsizes(indices)-1
    maskWA_WRF=rgrid2rcm(latAWAP(::-1),lonAWAP,maskWA(::-1,:),lat2d,lon2d,1)
 
   ;HadEX2
-  DATADIR5="/srv/ccrc/data03/z3356123/HadEX2/HadEX2_3.75x2.5deg/"
-  INDAT5=DATADIR5+"H2_"+index+"_1901-2010_RegularGrid_global_3.75x2.5deg_LSmask.nc"
+  ;DATADIR5="/srv/ccrc/data03/z3356123/HadEX2/HadEX2_3.75x2.5deg/"
+  ;INDAT5=DATADIR5+"H2_"+index+"_1901-2010_RegularGrid_global_3.75x2.5deg_LSmask.nc"
 
   ; ;GHCNDEX
+  DATADIR5="/srv/ccrc/data07/z3356123/GHCNDEX_2012/ghcndex_Apr2013/gridout/GHCNDEX_2.5x2.5deg/"
   ;  DATADIR5="/srv/ccrc/data07/z3356123/GHCNDEX_2012/ghcndex/gridout/GHCNDEX_2.5x2.5deg/"
-  ;  INDAT5=DATADIR5+"GHCND_"+index+"_1951-2013_RegularGrid_global_2.5x2.5deg_LSmask.nc"
+   INDAT5=DATADIR5+"GHCND_"+index+"_1951-2013_RegularGrid_global_2.5x2.5deg_LSmask.nc"
   
   ;NCEP 1
   DATADIR6="/srv/ccrc/data03/z3356123/NCEP1/fclimdex/indices_Jan2012/"
@@ -115,8 +121,8 @@ x = ispan(0,nyrs-1,1)
 sy_NARCliM=syear-1950
 sy_AWAP=syear-1900
 sy_NNRP=syear-1948
-;sy_GHCN=syear-1951
-sy_GHCN=syear-1901 ;HadEX2
+sy_GHCN=syear-1951
+;sy_GHCN=syear-1901 ;HadEX2
 
 file1  = addfile(INDAT1,"r")
  file2  = addfile(INDAT2,"r")
@@ -276,9 +282,9 @@ data4 = mask (data4, conform(data4, maskWA  , (/1,2/)), 1)
   fmtf   = "f5.0,1x,3f10.2"
   opt = True
 ;;  opt@title  = "Year      HadEX     HadGHCN   GHCNDEX"
-  ; opt@title  = "Year      R1        R2      R3      AWAP    GHCN    NCEP"
-  opt@title  = "Year      R1        R2      R3      AWAP    HadEX2    NCEP"
-  opt@fout = "/srv/ccrc/data13/z3393020/Analyses/NARCliM/ETCCDI/NARCliM_"+index+".txt"
+  opt@title  = "Year      R1        R2      R3      AWAP    GHCNDEX    NCEP"
+  ;opt@title  = "Year      R1        R2      R3      AWAP    HadEX2    NCEP"
+  opt@fout = "/srv/ccrc/data13/z3393020/Analyses/NARCliM/ETCCDI/NARCliM_GHCNDEX"+index+".txt"
   write_matrix (outmat, fmtf, opt)
 
 
@@ -306,7 +312,7 @@ print ("Trend (decadal) "+index+" Data6= "+rc_prob(0)*10+" (p="+rc_prob(1)+")")
 ; ********************************************
 ; Plot Annual Values and smoothed line as Overlay...
 
-  plotfile="/srv/ccrc/data13/z3393020/Analyses/NARCliM/ETCCDI/images/NARCliM_"+index+".png"
+  plotfile="/srv/ccrc/data13/z3393020/Analyses/NARCliM/ETCCDI/images/NARCliM_GHCNDEX"+index+".png"
   wks_type = "png"
   wks_type@wkWidth = 1600
   wks_type@wkHeight = 1200
@@ -353,8 +359,8 @@ print ("Trend (decadal) "+index+" Data6= "+rc_prob(0)*10+" (p="+rc_prob(1)+")")
 ; Legend with thick lines from smoothed curves
   sres@pmLegendDisplayMode    = "Always"   ; Display a legend.
 ;  LegendText= grids+" deg, m="+slopes
-;  sres@xyExplicitLegendLabels = (/"R1","R2","R3","AWAP","GHCN","NCEP1"/)
-  sres@xyExplicitLegendLabels = (/"R1","R2","R3","AWAP","HadEX2","NCEP1"/)
+  sres@xyExplicitLegendLabels = (/"R1","R2","R3","AWAP","GHCNDEX","NCEP1"/)
+;  sres@xyExplicitLegendLabels = (/"R1","R2","R3","AWAP","HadEX2","NCEP1"/)
 ;  sres@xyExplicitLegendLabels = LegendText
   ;sres@lgItemOrder  = (/ 3,2,1,0 /)   ; Reorder the legends
   sres@lgItemOrder  = (/ 1,0 /)   ; Reorder the legends

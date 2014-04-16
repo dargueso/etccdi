@@ -28,8 +28,6 @@ integer :: OMP_GET_NUM_THREADS,OMP_GET_THREAD_NUM,IDcpu,ID,status,i
 integer(4)            :: stnnum
 !      real(DP),dimension(2) :: time
 double precision     :: tfrom,tto
-character*5,dimension(3):: cName
-data cName/'Tmax','Tmin','PRCP'/
 real,allocatable,dimension(:,:,:,:) :: FDout,Rnmout,CDDout,R95pout,wcsdi,thresout
 real,allocatable,dimension(:,:,:,:,:) :: QCout,TXXout,RXout,TX10pout
 real,allocatable,dimension(:,:,:) :: GSLout
@@ -37,7 +35,8 @@ real,allocatable,dimension(:,:,:) :: GSLout
 
 namelist /input/ ipt_dir,opt_dir,para_file,tmax_dir,tmin_dir,prcp_dir,inf_file,log_file,  &
 OS,save_thresholds,sub_folder,NoMissingThreshold,is_rcm,is_thresfile,&
-prec_name,tmax_name,tmin_name, STDSPAN, BASESYEAR, BASEEYEAR, PRCPNN, Outname
+prec_name,tmax_name,tmin_name, STDSPAN, BASESYEAR, BASEEYEAR, PRCPNN, Outname, &
+lon_username,lat_username,time_username
 
 !$OMP parallel private(IDcpu);  IDcpu=omp_get_thread_num();   print*,'OpenMP ID #',IDcpu,'of ',omp_get_num_threads()
 !$OMP end parallel
@@ -48,6 +47,8 @@ NoMissingThreshold=0.85  ! default value.        ! suggested by Li
 !      Ofile_base='.\data\climdex' ! for Windows
 save_thresholds=.false.
 sub_folder=.false.
+
+
 
 call print_head
 

@@ -26,8 +26,10 @@ logical :: exists
 data_name(1)=trim(tmax_name)
 data_name(2)=trim(tmin_name)
 data_name(3)=trim(prec_name)
-data lon_name/'lon'/, lat_name/'lat'/,time_name/'time'/
 
+lon_name=trim(lon_username)
+lat_name=trim(lat_username)
+time_name=trim(time_username)
 
 ! define the name of the files
 ! No matter the order in the infilename_temp.txt

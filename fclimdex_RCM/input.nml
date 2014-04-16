@@ -31,6 +31,13 @@ prec_name='pracc'
 tmax_name='tasmax'
 tmin_name='tasmin'
 
+!name of the coordinates (variables of coordinates within NetCDF)
+
+lon_username='longitude'
+lat_username='latitude'
+time_username='time'
+
+
 !threshold file
 is_thresfile=F   !USE thresholds.nc
 

@@ -11,7 +11,7 @@
       real(DP)   :: LATITUDE, MISSING=-999.9,NoMissingThreshold
       integer(4),allocatable,save :: YMD(:,:), MNASTAT(:,:,:),YNASTAT(:,:)
       integer    :: ID_log,ID_ifile,IDsave,iend,ID_inf
-      character*80 :: folder(N_index),OS,Outname,Oname,log_file,ipt_dir,opt_dir,tmax_dir,tmin_dir,prcp_dir,inf_file,long_names(N_index),tmax_name,tmin_name,prec_name
+      character*80 :: folder(N_index),OS,Outname,Oname,log_file,ipt_dir,opt_dir,tmax_dir,tmin_dir,prcp_dir,inf_file,long_names(N_index),tmax_name,tmin_name,prec_name,lon_username,lat_username,time_username
       character*10  :: cmonth(13),ann(1),season(4),units(N_index)
       character(1)  :: sub2(2),sub
       real(DP),allocatable,dimension(:,:,:), save ::data_tmax,data_tmin,data_prcp

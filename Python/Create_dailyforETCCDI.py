@@ -40,11 +40,20 @@ for gind,gname in enumerate(GCM_names):
       for dind,dname in enumerate(Domain_names):
         print "Creating file for: ", gname,rname,pname,dname
         print "variable: ",varw
-        fullpathin=cu.get_postproc_location(gname,rname,pname)[0]
+        if varw == 'pracc_fl':
+          fullpathin='/srv/ccrc/data30/z3393020/NARCliM/filtered/%s/%s/%s/'%(gname,rname,pname)
+        else:  
+          fullpathin=cu.get_postproc_location(gname,rname,pname)[0]
+        
+        
+        print '%s/%s/CCRC_NARCliM_DAY_*_%s.nc' %(fullpathin,dname,varw)
         fullpathout='%s/%s/%s/%s/%s/' %(pathout,gname,rname,pname,dname)
         if not os.path.exists(fullpathout):
           os.makedirs(fullpathout)
         
         filesin=sorted(glob.glob('%s/%s/CCRC_NARCliM_DAY_*_%s.nc' %(fullpathin,dname,varw)))  
+        if os.path.exists("%s/CCRC_NARCliM_DAY_%s_%s.nc" %(fullpathout,pname,varw)):
+          os.remove("%s/CCRC_NARCliM_DAY_%s_%s.nc" %(fullpathout,pname,varw))
+          
         ofile="%s/CCRC_NARCliM_DAY_%s_%s.nc" %(fullpathout,pname,varw)
         cdo.cat(input=filesin,output=ofile)

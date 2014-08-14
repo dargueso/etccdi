@@ -144,7 +144,8 @@ end if
 
     data start /1,1,1/
     data ctit/'thresan10','thresan50','thresan90','thresax10','thresax50','thresax90'/
-
+    
+    print*,'saving threshold data ...'
     count(1)=Nlon; count(2)=Nlat; count(3)=DoY
     write(ctmp,'("index ",a,a)') trim(folder(nindx)),' 6 levels: 3 for Tmin, 3 for Tmax.'
 

@@ -1,0 +1,43 @@
+ &input
+OS='linux',
+! OS='windows',
+NoMissingThreshold=0.2,  ! suggested by Lisa
+ipt_dir=  '%ipt_dir%',
+opt_dir=  '%opt_dir%',
+
+
+tmax_dir= '%tmax_filename%',
+tmin_dir= '%tmin_filename%',
+prcp_dir= '%prcp_filename%',
+
+
+STDSPAN=5,
+BASESYEAR=1990,
+BASEEYEAR=2009,
+PRCPNN=25,
+Outname= '%outname%',
+
+
+save_thresholds= %save_thres%,  ! Save the thresholds
+sub_folder=F,   ! put all indices in the same opt_dir
+
+log_file='%log_file%'     ! log file
+
+!RCMs
+is_rcm=F 
+!name of the variables
+tmax_name= '%tmax_name%'
+tmin_name= '%tmin_name%'
+prec_name= '%prec_name%'
+
+
+!name of the coordinates (variables of coordinates within NetCDF)
+
+lon_username='lon'
+lat_username='lat'
+time_username='time'
+
+!threshold file
+is_thresfile= %is_thres%   !USE thresholds.nc
+
+/

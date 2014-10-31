@@ -128,22 +128,23 @@ end if
 
 
 
-   subroutine out_nc2_f90(nindx,data)
+   subroutine out_nc2_f90(nindx,datat,datapr)
     use COMM
     use netcdf
 
 !... define the variables used in this program !
-    integer nindx, ncid,ID_data(6)
+    integer nindx, ncid,ID_data(6),ID_datapr(2)
     integer LATID, LONID, TIMEID                ! dimention's ID
     integer varID_lon,varID_lat,varID_time      ! variable's ID
-    integer dataDim(3),coordim(2)
-    real data(Nlon, Nlat, DoY,6)      ! variable array
+    integer dataDim(3),coordim(2),datadimpr(2)
+    real datat(Nlon, Nlat, DoY,6),datapr(Nlon,Nlat,2)       ! variable array temperature and precip thresholds        
     integer start(3), count(3)
     character*150 :: O_file
-    character*100 :: ctmp, ctit(6)
+    character*100 :: ctmp, ctit(6), ctip(2)
 
     data start /1,1,1/
     data ctit/'thresan10','thresan50','thresan90','thresax10','thresax50','thresax90'/
+    data ctip/'thresanp95','thresanp99'/
     
     print*,'saving threshold data ...'
     count(1)=Nlon; count(2)=Nlat; count(3)=DoY
@@ -167,8 +168,6 @@ if (is_rcm) then
 	coordim(2)=latid
     call err_handle(NF90_def_var(ncid, 'lon', NF90_float, coordim,varID_lon),'define var lon')
     call err_handle(NF90_def_var(ncid, 'lat', NF90_float, coordim,varID_lat),'define var lat')
-   ! call err_handle(NF90_def_var(ncid, 'lon', NF90_float, lonID,varID_lon),'define var lon')
-   ! call err_handle(NF90_def_var(ncid, 'lat', NF90_float, latID,varID_lat),'define var lat')
     call err_handle(NF90_def_var(ncid, 'doy', NF90_int, timeID,varID_time),'define var time')
 else
 
@@ -180,11 +179,21 @@ end if
     datadim(1)=lonid
     datadim(2)=latid
     datadim(3)=timeid
+    datadimpr(1)=lonid
+    datadimpr(2)=latid
+    
     do i=1,6
        call err_handle(NF90_def_var(ncid, trim(ctit(i)), NF90_float, datadim, ID_data(i)),'define data')
        call err_handle(NF90_put_att(ncid, ID_data(i), 'missing_value', MISSING),'put att for data')
        call err_handle(NF90_put_att(ncid, ID_data(i), '_FillValue', MISSING),'put att for data')
     enddo
+    
+    do i=1,2
+       call err_handle(NF90_def_var(ncid, trim(ctip(i)), NF90_float, datadimpr, ID_datapr(i)),'define data')
+       call err_handle(NF90_put_att(ncid, ID_datapr(i), 'missing_value', MISSING),'put att for data')
+       call err_handle(NF90_put_att(ncid, ID_datapr(i), '_FillValue', MISSING),'put att for data')
+    enddo
+      
 
 !... Put attribute of variables
     call err_handle(NF90_put_att(ncid, NF90_global, 'Title', trim(ctmp)),'define global title')
@@ -219,7 +228,11 @@ else
 end if
 !... begin to put data in to this file!
      do i=1,6
-        call err_handle(NF90_put_var(ncid, ID_data(i), data(:,:,:,i)),'save data')
+        call err_handle(NF90_put_var(ncid, ID_data(i), datat(:,:,:,i)),'save data')
+     enddo
+     
+     do i=1,2
+        call err_handle(NF90_put_var(ncid, ID_datapr(i), datapr(:,:,i)),'save data')
      enddo
 !... close this file..
     call err_handle(NF90_close(ncid),'close nc file')

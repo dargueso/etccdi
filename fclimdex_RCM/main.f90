@@ -30,7 +30,7 @@ integer(4)            :: stnnum
 double precision     :: tfrom,tto
 real,allocatable,dimension(:,:,:,:) :: FDout,Rnmout,CDDout,R95pout,wcsdi,thresout
 real,allocatable,dimension(:,:,:,:,:) :: QCout,TXXout,RXout,TX10pout
-real,allocatable,dimension(:,:,:) :: GSLout
+real,allocatable,dimension(:,:,:) :: GSLout,thresoutpr
 !      real,allocatable :: indx_mon(:,:,:,:),indx_year(:,:,:)
 
 namelist /input/ ipt_dir,opt_dir,para_file,tmax_dir,tmin_dir,prcp_dir,inf_file,log_file,  &
@@ -86,7 +86,7 @@ write(Oname,'(a,"_",i4.4,"-",i4.4,"_")') trim(Outname),Syear,Eyear      ! name f
 BYRS=BASEEYEAR-BASESYEAR+1
 
 allocate(Tmax(tot),Tmin(tot),PRCP(tot))
-allocate(MNASTAT(YRS,12,3),YNASTAT(YRS,3),thresout(Nlon,Nlat,DoY,6))
+allocate(MNASTAT(YRS,12,3),YNASTAT(YRS,3),thresout(Nlon,Nlat,DoY,6),thresoutpr(Nlon,Nlat,2))
 allocate(QCout(Nlon,Nlat,YRS,13,3),FDout(Nlon,Nlat,YRS,4),GSLout(Nlon,Nlat,YRS),TXXout(Nlon,Nlat,YRS,13,5), &
 Rnmout(Nlon,Nlat,YRS,4),RXout(Nlon,Nlat,YRS,13,2),CDDout(Nlon,Nlat,YRS,2),R95pout(Nlon,Nlat,YRS,3), &
 TX10pout(Nlon,Nlat,YRS,13,6),wcsdi(Nlon,Nlat,YRS,2))
@@ -118,8 +118,8 @@ call TXX(TXXout(lon_i,lat_j,:,:,:))    ! TXx, TXn, TNx, TNn, DTR (13 months)
 call Rnnmm(Rnmout(lon_i,lat_j,:,:))  ! R10mm, R20mm, Rnnmm, SDII (Annual)
 call RX5day(RXout(lon_i,lat_j,:,:,:)) ! Rx1day, Rx5day (13 months)
 call CDD(CDDout(lon_i,lat_j,:,:))    ! CDD, CWD (Annual)
-call R95p(R95pout(lon_i,lat_j,:,:))   ! R95p, R99p, PRCPtot (Annual)
-call TX10p(TX10Pout(lon_i,lat_j,:,:,:),wcsdi(lon_i,lat_j,:,:),thresout(lon_i,lat_j,:,:),lat_j,lon_i)   ! tn10p,tn50p,tn90p,tx10p,tx50p,tx90p (13 months); wsdi,csdi (Annual)
+call R95p(R95pout(lon_i,lat_j,:,:),thresoutpr(lon_i,lat_j,:,:),lon_i,lat_j) ! R95p, R99p, PRCPtot (Annual)
+call TX10p(TX10Pout(lon_i,lat_j,:,:,:),wcsdi(lon_i,lat_j,:,:),thresout(lon_i,lat_j,:,:),lon_i,lat_j)   ! tn10p,tn50p,tn90p,tx10p,tx50p,tx90p (13 months); wsdi,csdi (Annual)
 78      continue
 enddo
 enddo
@@ -168,12 +168,12 @@ enddo
 !  print*,'thresholds:',thresout(1,1,1:5,1:2),thresout(1,1,360:365,1:2)
 !  print*,maxval(thresout(:,:,1:5,:)),minval(thresout(:,:,1:5,:))
 
-if(save_thresholds) call out_nc2_f90(33,thresout)
+if(save_thresholds) call out_nc2_f90(33,thresout,thresoutpr)
 call get_time(2,ID_log,tto)
 print*,'finish saving netcdf data ...'
 
 deallocate(MNASTAT,YNASTAT,QCout,FDout,GSLout,TXXout, lon,lat,time, &
-Rnmout,RXout,CDDout,R95pout,TX10pout,wcsdi,YMD,data_tmax,data_tmin,data_prcp,thresout)
+Rnmout,RXout,CDDout,R95pout,TX10pout,wcsdi,YMD,data_tmax,data_tmin,data_prcp,thresout,thresoutpr)
 stnnum=stnnum+1
 
 write(ID_log,*) "Total ",stnnum," dataset(s) were calculated !"

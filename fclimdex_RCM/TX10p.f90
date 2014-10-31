@@ -1,4 +1,4 @@
-      subroutine TX10p(Tout,wcsdi,thresOut,lat_j,lon_i)  ! tn10out,tn50out,tn90out,tx10out,tx50out,tx90out (13 months); wsdi,csdi
+      subroutine TX10p(Tout,wcsdi,thresOut,lon_i,lat_j)  ! tn10out,tn50out,tn90out,tx10out,tx50out,tx90out (13 months); wsdi,csdi
       use COMM
       use functions
 	  use netcdf

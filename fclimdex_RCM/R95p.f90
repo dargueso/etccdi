@@ -1,4 +1,4 @@
-      subroutine R95p(oout,thresOutpr)  ! r95out,r99out, prcpout
+      subroutine R95p(oout,thresOutpr,lon_i,lat_j)  ! r95out,r99out, prcpout
       use COMM
       use functions
       character*80:: ofile,file_thres

@@ -1,8 +1,10 @@
       subroutine R95p(oout,thresOutpr,lon_i,lat_j)  ! r95out,r99out, prcpout
       use COMM
       use functions
+      use netcdf
       character*80:: ofile,file_thres
-      integer     :: year, month, day, kth,cnt,leng,i,ID, Ky
+      integer     :: year, month, day, kth,cnt,leng,i,ID, Ky,&
+                     lon_i,lat_j,ncidt,status,ID_varnp95,ID_varnp99
       real(DP)    :: p95,p99
       real(DP),dimension(YRS,3):: oout
       real(DP),dimension(2):: thresOutpr
@@ -42,11 +44,13 @@
         
         file_thres="thresholds.nc"
         call err_handle(nf90_open(file_thres,NF90_nowrite,ncidt), 'open file')
+        
         call err_handle(NF90_INQ_VARID (ncidt, "thresanp95", ID_varnp95),'inquire p95 var ID')
-        call err_handle(NF90_get_var(ncidt,ID_varnp95,p95,start=(/lon_i,lat_j/)),'get Var p95')
+        call err_handle(NF90_get_var(ncidt,ID_varnp95,p95),'get Var p95')
+        
         
         call err_handle(NF90_INQ_VARID (ncidt, "thresanp99", ID_varnp99),'inquire p99 var ID')
-        call err_handle(NF90_get_var(ncidt,ID_varnp99,p99,start=(/lon_i,lat_j/)),'get Var p99')
+        call err_handle(NF90_get_var(ncidt,ID_varnp99,p99),'get Var p99')
         
         call err_handle(nf90_close(ncidt), 'close file')
         

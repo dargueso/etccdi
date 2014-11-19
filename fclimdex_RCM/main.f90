@@ -118,7 +118,7 @@ call TXX(TXXout(lon_i,lat_j,:,:,:))    ! TXx, TXn, TNx, TNn, DTR (13 months)
 call Rnnmm(Rnmout(lon_i,lat_j,:,:))  ! R10mm, R20mm, Rnnmm, SDII (Annual)
 call RX5day(RXout(lon_i,lat_j,:,:,:)) ! Rx1day, Rx5day (13 months)
 call CDD(CDDout(lon_i,lat_j,:,:))    ! CDD, CWD (Annual)
-call R95p(R95pout(lon_i,lat_j,:,:),thresoutpr(lon_i,lat_j,:,:),lon_i,lat_j) ! R95p, R99p, PRCPtot (Annual)
+call R95p(R95pout(lon_i,lat_j,:,:),thresoutpr(lon_i,lat_j,:),lon_i,lat_j) ! R95p, R99p, PRCPtot (Annual)
 call TX10p(TX10Pout(lon_i,lat_j,:,:,:),wcsdi(lon_i,lat_j,:,:),thresout(lon_i,lat_j,:,:),lon_i,lat_j)   ! tn10p,tn50p,tn90p,tx10p,tx50p,tx90p (13 months); wsdi,csdi (Annual)
 78      continue
 enddo

@@ -46,11 +46,11 @@
         call err_handle(nf90_open(file_thres,NF90_nowrite,ncidt), 'open file')
         
         call err_handle(NF90_INQ_VARID (ncidt, "thresanp95", ID_varnp95),'inquire p95 var ID')
-        call err_handle(NF90_get_var(ncidt,ID_varnp95,p95),'get Var p95')
+        call err_handle(NF90_get_var(ncidt,ID_varnp95,p95,start=(/lon_i,lat_j/)),'get Var p95')
         
         
         call err_handle(NF90_INQ_VARID (ncidt, "thresanp99", ID_varnp99),'inquire p99 var ID')
-        call err_handle(NF90_get_var(ncidt,ID_varnp99,p99),'get Var p99')
+        call err_handle(NF90_get_var(ncidt,ID_varnp99,p99,start=(/lon_i,lat_j/)),'get Var p99')
         
         call err_handle(nf90_close(ncidt), 'close file')
         

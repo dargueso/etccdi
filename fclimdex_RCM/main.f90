@@ -91,7 +91,7 @@ allocate(QCout(Nlon,Nlat,YRS,13,3),FDout(Nlon,Nlat,YRS,4),GSLout(Nlon,Nlat,YRS),
 Rnmout(Nlon,Nlat,YRS,4),RXout(Nlon,Nlat,YRS,13,2),CDDout(Nlon,Nlat,YRS,2),R95pout(Nlon,Nlat,YRS,3), &
 TX10pout(Nlon,Nlat,YRS,13,6),wcsdi(Nlon,Nlat,YRS,2))
 
-thresout=MISSING; QCout=MISSING; FDout=MISSING; GSLout=MISSING; TXXout=MISSING; Rnmout=MISSING; RXout=MISSING
+thresout=MISSING; thresoutpr=MISSING; QCout=MISSING; FDout=MISSING; GSLout=MISSING; TXXout=MISSING; Rnmout=MISSING; RXout=MISSING
 CDDout=MISSING; R95pout=MISSING; TX10pout=MISSING; wcsdi=MISSING
 
 do lat_j=1,Nlat

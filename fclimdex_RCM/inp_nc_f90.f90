@@ -275,22 +275,26 @@ allocate(tmx(len_lon,len_lat,len_time(1))) ! First dimension is time, before-las
 
 call err_handle(NF90_get_var(ncid(1),ID_var(1),tmx),'get Var real -- Tmax')
 if(NF90_GET_ATT(NCID(1), ID_var(1),'missing_value',miss) == NF90_noerr) then
-	where(tmx == miss) tmx=MISSING
-		endif
-		if(NF90_GET_ATT(NCID(1), ID_var(1),'_FillValue',miss) == NF90_noerr) then
-			where(tmx == miss) tmx=MISSING
-				endif
+  where(tmx == miss) tmx=MISSING
+endif
+if(NF90_GET_ATT(NCID(1), ID_var(1),'_FillValue',miss) == NF90_noerr) then
+     where(tmx == miss) tmx=MISSING
+endif
+
+where(tmx /= MISSING) tmx=tmx-273.15
 
 !GET MINIMUM TEMPERATURE
 allocate(tmn(len_lon,len_lat,len_time(2)))
 
 call err_handle(NF90_get_var(ncid(2),ID_var(2),tmn),'get Var real -- Tmin')
 if(NF90_GET_ATT(NCID(2), ID_var(2),'missing_value',miss) == NF90_noerr) then
-	where(tmn == miss) tmn=MISSING
-		endif
-		if(NF90_GET_ATT(NCID(2), ID_var(2),'_FillValue',miss) == NF90_noerr) then
-			where(tmn == miss) tmn=MISSING
-				endif
+     where(tmn == miss) tmn=MISSING
+endif
+if(NF90_GET_ATT(NCID(2), ID_var(2),'_FillValue',miss) == NF90_noerr) then
+          where(tmn == miss) tmn=MISSING
+endif
+
+where(tmn /= MISSING) tmn=tmn-273.15
 
 
 !GET PRECIPITATION

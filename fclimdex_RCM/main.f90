@@ -83,6 +83,8 @@ write(Oname,'(a,"_",i4.4,"-",i4.4,"_")') trim(Outname),Syear,Eyear      ! name f
 !stop 'Error: the input data file names have different header ...'
 !endif
 
+write(BPname,'(i4.4,"-",i4.4)') BASEEYEAR,BASESYEAR      ! name for base_period attribute in output
+
 BYRS=BASEEYEAR-BASESYEAR+1
 
 allocate(Tmax(tot),Tmin(tot),PRCP(tot))

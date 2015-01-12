@@ -82,6 +82,7 @@ end if
     call err_handle(NF90_put_att(ncid, NF90_global, 'history', 'Created from Fclimdex version 3.1.1 '),'define global history')
     call err_handle(NF90_put_att(ncid, NF90_global, 'units',  trim(units(nindx))),'define global unit')
     call err_handle(NF90_put_att(ncid, NF90_global, 'long_name', trim(long_names(nindx))),'define global long_name')
+    call err_handle(NF90_put_att(ncid, NF90_global, 'base_period', trim(BPname),'define global base_period')
 !    call err_handle(NF90_put_att(ncid, NF90_global, 'missing_value', ,MISSING),'put att for data')
 !    call err_handle(NF90_put_att(ncid, NF90_global, '_FillValue', MISSING),'put att for data')
 

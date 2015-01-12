@@ -83,7 +83,7 @@ write(Oname,'(a,"_",i4.4,"-",i4.4,"_")') trim(Outname),Syear,Eyear      ! name f
 !stop 'Error: the input data file names have different header ...'
 !endif
 
-write(BPname,'(i4.4,"-",i4.4)') BASEEYEAR,BASESYEAR      ! name for base_period attribute in output
+write(BPname,'(i4.4,"-",i4.4)') BASESYEAR,BASEEYEAR      ! name for base_period attribute in output
 print*,'THE BASEPERIOD NAME IS: ',BPname
 BYRS=BASEEYEAR-BASESYEAR+1
 

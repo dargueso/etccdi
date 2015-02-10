@@ -135,8 +135,8 @@ end if
 
 !... define the variables used in this program !
     integer nindx, ncid,ID_data(6),ID_datapr(2)
-    integer LATID, LONID, TIMEID                ! dimention's ID
-    integer varID_lon,varID_lat,varID_time      ! variable's ID
+    integer LATID, LONID, doyID                ! dimention's ID
+    integer varID_lon,varID_lat,varID_doy      ! variable's ID
     integer dataDim(3),coordim(2),datadimpr(2)
     real datat(Nlon, Nlat, DoY,6),datapr(Nlon,Nlat,2)       ! variable array temperature and precip thresholds        
     integer start(3), count(3)
@@ -158,28 +158,28 @@ end if
     endif
 
 !... begin to creat a new NetCDF file 
-    call err_handle(NF90_create(O_file, NF90_clobber, ncid),'create nc file')
+    call err_handle(NF90_create(O_file, NF90_NETCDF4, ncid),'create nc file')
 
 !... begin to define your dimentions
     call err_handle(NF90_def_dim(ncid, 'lon', Nlon, LONID),'define lon dimension')
     call err_handle(NF90_def_dim(ncid, 'lat', Nlat, LATID),'define lat dimension')
-    call err_handle(NF90_def_dim(ncid, 'doy', DoY, TIMEID),'define time dimension')
+    call err_handle(NF90_def_dim(ncid, 'doy', DoY, doyID),'define doy dimension')
 if (is_rcm) then
 	coordim(1)=lonid
 	coordim(2)=latid
     call err_handle(NF90_def_var(ncid, 'lon', NF90_float, coordim,varID_lon),'define var lon')
     call err_handle(NF90_def_var(ncid, 'lat', NF90_float, coordim,varID_lat),'define var lat')
-    call err_handle(NF90_def_var(ncid, 'doy', NF90_int, timeID,varID_time),'define var time')
+    call err_handle(NF90_def_var(ncid, 'doy', NF90_float, doyID,varID_doy),'define var doy')
 else
 
     call err_handle(NF90_def_var(ncid, 'lon', NF90_float, lonID,varID_lon),'define var lon')
     call err_handle(NF90_def_var(ncid, 'lat', NF90_float, latID,varID_lat),'define var lat')
-    call err_handle(NF90_def_var(ncid, 'doy', NF90_int, timeID,varID_time),'define var time')
+    call err_handle(NF90_def_var(ncid, 'doy', NF90_float, doyID,varID_doy),'define var doy')
 end if
 !... begin to define varibles
     datadim(1)=lonid
     datadim(2)=latid
-    datadim(3)=timeid
+    datadim(3)=doyid
     datadimpr(1)=lonid
     datadimpr(2)=latid
     
@@ -211,7 +211,7 @@ end if
     call err_handle(NF90_put_att(ncid, varID_lat, 'units', 'degrees_north'),'put att for lat')
     call err_handle(NF90_put_att(ncid, varID_lat, 'axis', 'Y'),'put att for lat')
 
-    call err_handle(NF90_put_att(ncid, varID_time, 'units', 'day since 1-1-0 00:00:00'),'put att for time')
+    call err_handle(NF90_put_att(ncid, varID_doy, 'units', 'Day of the year - 365'),'put att for doy')
 
 !... end of define mode
     call err_handle(NF90_enddef(ncid),'end define')
@@ -220,12 +220,12 @@ end if
 if (is_rcm) then
     call err_handle(NF90_put_var(ncid, varID_lon, lon2d),'save lon var')
     call err_handle(NF90_put_var(ncid, varID_lat, lat2d),'save lat var')
-    call err_handle(NF90_put_var(ncid, varID_time, (/(i,i=1,DoY)/)),'save time var')
+    call err_handle(NF90_put_var(ncid, varID_doy, (/(i,i=1,DoY)/)),'save doy var')
 else
 
     call err_handle(NF90_put_var(ncid, varID_lon, lon),'save lon var')
     call err_handle(NF90_put_var(ncid, varID_lat, lat),'save lat var')
-    call err_handle(NF90_put_var(ncid, varID_time, (/(i,i=1,DoY)/)),'save time var')
+    call err_handle(NF90_put_var(ncid, varID_doy, (/(i,i=1,DoY)/)),'save doy var')
 end if
 !... begin to put data in to this file!
      do i=1,6

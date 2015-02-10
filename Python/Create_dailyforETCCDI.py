@@ -18,18 +18,16 @@ import sys
 import os
 import glob
 import ccrc_utils as cu
+import pdb
 from cdo import *   # python version
 cdo = Cdo()
 
-varw="tasmin"
-pathin="/home/z3393020/Analyses/NARCliM/Bias_corrected/"
-GCM_names=['MIROC3.2','CCCMA3.1','ECHAM5','CSIRO-MK30']
+varw="pracc"
+GCM_names=['MIROC3.2','CCCMA3.1','ECHAM5','CSIRO-MK3.0']
 RCM_names=['R1','R2','R3']
 Period_names=['1990-2010','2020-2040','2060-2080']
 Domain_names=['d01','d02']
-Period_covers={'1990-2010':'1990-1999',
-               '2020-2040':'2020-2029',
-               '2060-2080':'2060-2069'}
+
 pathout='/srv/ccrc/data13/z3393020/Analyses/NARCliM/ForETCCDI/'
 
 

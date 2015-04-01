@@ -36,7 +36,7 @@ eyear = int(inputinf['eyear'])
 bsyear = int(inputinf['basesyear'])
 beyear = int(inputinf['baseeyear'])
 byrs = beyear-bsyear+1
-fullpathin="%s/%s%s-%s_" %(inputinf['outpath'],inputinf['outname'],syear,eyear)
+fullpathout="%s/%s%s-%s_" %(inputinf['outpath'],inputinf['outname'],syear,eyear)
 dates,years,months = em.calc_dates(syear,eyear)
 otime_y = em.calc_otime(years,"years")
 otime_m = em.calc_otime(years,"months")
@@ -58,7 +58,14 @@ time = filepr.variables[inputinf['time_username']][:]
 lon  = filepr.variables[inputinf['lon_username']][:]
 lat  = filepr.variables[inputinf['lat_username']][:]
 
+
+
 if ((len(lon.shape)==1) & (len(lat.shape)==1)):
+  
+  if lat[0]>lat[-1]:
+    lat=lat[::-1]
+    prec=prec[:,::-1,:]
+  
   newlon=lon.repeat(lat.shape[0])
   newlon=np.resize(newlon,(lon.shape[0],lat.shape[0])).T
   newlat=lat.repeat(lon.shape[0])
@@ -83,21 +90,40 @@ if int(inputinf['is_thresfile'])==0:
 #Reduce variable to analysis period
 prec=prec[(years_input>=syear) & (years_input<=eyear),:,:]
 
-# R10mm,R20mm,Rnnmm,SDII=em.calc_R10mm(prec,years,float(inputinf['Rnnmm']))
-# em.write_fileout(R10mm,"R10mm",otime_y,"%s%s.nc"%(fullpathin,"R10mm"),lat,lon,inputinf)
-# em.write_fileout(R20mm,"R20mm",otime_y,"%s%s.nc"%(fullpathin,"R20mm"),lat,lon,inputinf)
-# em.write_fileout(Rnnmm,"Rnnmm",otime_y,"%s%s.nc"%(fullpathin,"Rnnmm"),lat,lon,inputinf)
-# em.write_fileout(SDII ,"SDII",otime_y, "%s%s.nc"%(fullpathin, "SDII"),lat,lon,inputinf)
+## Calculate qualitymask for precip
+prec_mask=em.calc_qualitymask(prec,years,inputinf)
 
-# Rx1day,Rx5day=em.calc_Rx5day(prec,years,months)
-# em.write_fileout(Rx1day,"Rx1day",otime_m,"%s%s.nc"%(fullpathin,"Rx1day"),lat,lon,inputinf)
-# em.write_fileout(Rx5day,"Rx5day",otime_m,"%s%s.nc"%(fullpathin,"Rx5day"),lat,lon,inputinf)
 
-# R95p,R99p,PRCPtot,prec95,prec99=em.calc_R95p(prec,years,inputinf)
-# em.write_fileout(R95p,"R95p",otime_y,"%s%s.nc"%(fullpathin,"R95p"),lat,lon,inputinf)
-# em.write_fileout(R99p,"R99p",otime_y,"%s%s.nc"%(fullpathin,"R99p"),lat,lon,inputinf)
-# em.write_fileout(PRCPtot,"PRCPtot",otime_y,"%s%s.nc"%(fullpathin,"PRCPtot"),lat,lon,inputinf)
 
+R10mm,R20mm,Rnnmm,SDII=em.calc_R10mm(prec,years,float(inputinf['Rnnmm']))
+
+R10mm[prec_mask==True]=const.missingval
+R20mm[prec_mask==True]=const.missingval
+Rnnmm[prec_mask==True]=const.missingval
+SDII[prec_mask==True]=const.missingval
+
+em.write_fileout(R10mm,"R10mm",otime_y,"%s%s.nc"%(fullpathout,"R10mm"),lat,lon,inputinf)
+em.write_fileout(R20mm,"R20mm",otime_y,"%s%s.nc"%(fullpathout,"R20mm"),lat,lon,inputinf)
+em.write_fileout(Rnnmm,"Rnnmm",otime_y,"%s%s.nc"%(fullpathout,"Rnnmm"),lat,lon,inputinf)
+em.write_fileout(SDII ,"SDII",otime_y, "%s%s.nc"%(fullpathout, "SDII"),lat,lon,inputinf)
+
+Rx1day,Rx5day=em.calc_Rx5day(prec,years,months)
+
+Rx1day[prec_mask==True]=const.missingval
+Rx5day[prec_mask==True]=const.missingval
+
+em.write_fileout(Rx1day,"Rx1day",otime_m,"%s%s.nc"%(fullpathout,"Rx1day"),lat,lon,inputinf)
+em.write_fileout(Rx5day,"Rx5day",otime_m,"%s%s.nc"%(fullpathout,"Rx5day"),lat,lon,inputinf)
+
+R95p,R99p,PRCPtot,prec95,prec99=em.calc_R95p(prec,years,inputinf)
+
+R95p[prec_mask==True]=const.missingval
+R99p[prec_mask==True]=const.missingval
+PRCPtot[prec_mask==True]=const.missingval
+
+em.write_fileout(R95p,"R95p",otime_y,"%s%s.nc"%(fullpathout,"R95p"),lat,lon,inputinf)
+em.write_fileout(R99p,"R99p",otime_y,"%s%s.nc"%(fullpathout,"R99p"),lat,lon,inputinf)
+em.write_fileout(PRCPtot,"PRCPtot",otime_y,"%s%s.nc"%(fullpathout,"PRCPtot"),lat,lon,inputinf)
 
 filepr.close()
 ###############################################
@@ -124,6 +150,26 @@ print "Tmax dimensions are: ", tmax.shape[:]
 print "Tmin dimensions are: ", tmin.shape[:]
 ### Check dimensions ###
 
+time = filetx.variables[inputinf['time_username']][:]
+lon  = filetx.variables[inputinf['lon_username']][:]
+lat  = filetx.variables[inputinf['lat_username']][:]
+
+
+
+if ((len(lon.shape)==1) & (len(lat.shape)==1)):
+  
+  if lat[0]>lat[-1]:
+    lat=lat[::-1]
+    tmax=tmax[:,::-1,:]
+    tmin=tmin[:,::-1,:]
+    
+    newlon=lon.repeat(lat.shape[0])
+    newlon=np.resize(newlon,(lon.shape[0],lat.shape[0])).T
+    newlat=lat.repeat(lon.shape[0])
+    newlat=np.resize(newlat,(lat.shape[0],lon.shape[0]))
+    lon=newlon.copy()
+    lat=newlat.copy()
+
 # if (tmax.shape[1:]!=lon.shape) or (tmin.shape[1:]!=lon.shape) or (lat.shape!=lon.shape):
 #     sys.exit("ERROR: Coordinate dimensions in temperature do not coincide with lat/lon size (from prec file). Check dimensions for all variables")
 # if (tmax.shape[0]!=len(time)):
@@ -142,41 +188,84 @@ if tmax_units=='K':
 if tmin_units=='K':
     tmin=tmin-const.tkelvin
 
+## Calculate qualitymask for tmax, tmin
+if isinstance(tmax,np.ma.core.MaskedArray):
+  tmax_mask=em.calc_qualitymask(tmax,years,inputinf)
+else:
+  tmax_mask=np.zeros((eyear-syear+1,)+tmax.shape[1:],dtype=np.bool)
+  
+if isinstance(tmin,np.ma.core.MaskedArray):
+  tmin_mask=em.calc_qualitymask(tmin,years,inputinf)
+else:
+  tmin_mask=np.zeros((eyear-syear+1,)+tmin.shape[1:],dtype=np.bool)
+  
+  
+
 filetx.close()
 filetn.close()
-# FD,ID,SU,TR = em.calc_SU(tmax,years)
-# em.write_fileout(FD,"FD",otime_y,"%s%s.nc"%(fullpathin,"FD"),lat,lon,inputinf)
-# em.write_fileout(ID,"ID",otime_y,"%s%s.nc"%(fullpathin,"ID"),lat,lon,inputinf)
-# em.write_fileout(SU,"SU",otime_y,"%s%s.nc"%(fullpathin,"SU"),lat,lon,inputinf)
-# em.write_fileout(TR,"TR",otime_y,"%s%s.nc"%(fullpathin,"TR"),lat,lon,inputinf)
+FD,ID,SU,TR = em.calc_FD(tmax,tmin,years)
 
-# TXx,TXn,TNn,TNx,DTR = em.calc_TXx(tmax,tmin,years,months)
-# em.write_fileout(TXx,"TXx",otime_m,"%s%s.nc"%(fullpathin,"TXx"),lat,lon,inputinf)
-# em.write_fileout(TXn,"TXn",otime_m,"%s%s.nc"%(fullpathin,"TXn"),lat,lon,inputinf)
-# em.write_fileout(TNx,"TNx",otime_m,"%s%s.nc"%(fullpathin,"TNx"),lat,lon,inputinf)
-# em.write_fileout(TNn,"TNn",otime_m,"%s%s.nc"%(fullpathin,"TNn"),lat,lon,inputinf)
-# em.write_fileout(DTR,"DTR",otime_m,"%s%s.nc"%(fullpathin,"DTR"),lat,lon,inputinf)
+FD[tmin_mask==True]=const.missingval
+ID[tmax_mask==True]=const.missingval
+SU[tmax_mask==True]=const.missingval
+TR[tmin_mask==True]=const.missingval
+
+em.write_fileout(FD,"FD",otime_y,"%s%s.nc"%(fullpathout,"FD"),lat,lon,inputinf)
+em.write_fileout(ID,"ID",otime_y,"%s%s.nc"%(fullpathout,"ID"),lat,lon,inputinf)
+em.write_fileout(SU,"SU",otime_y,"%s%s.nc"%(fullpathout,"SU"),lat,lon,inputinf)
+em.write_fileout(TR,"TR",otime_y,"%s%s.nc"%(fullpathout,"TR"),lat,lon,inputinf)
+
+TXx,TXn,TNn,TNx,DTR = em.calc_TXx(tmax,tmin,years,months)
+
+TXx[tmax_mask==True]=const.missingval
+TXn[tmax_mask==True]=const.missingval
+TNn[tmin_mask==True]=const.missingval
+TNx[tmin_mask==True]=const.missingval
+DTR[((tmin_mask==True) | (tmax_mask==True))]=const.missingval
+
+em.write_fileout(TXx,"TXx",otime_m,"%s%s.nc"%(fullpathout,"TXx"),lat,lon,inputinf)
+em.write_fileout(TXn,"TXn",otime_m,"%s%s.nc"%(fullpathout,"TXn"),lat,lon,inputinf)
+em.write_fileout(TNx,"TNx",otime_m,"%s%s.nc"%(fullpathout,"TNx"),lat,lon,inputinf)
+em.write_fileout(TNn,"TNn",otime_m,"%s%s.nc"%(fullpathout,"TNn"),lat,lon,inputinf)
+em.write_fileout(DTR,"DTR",otime_m,"%s%s.nc"%(fullpathout,"DTR"),lat,lon,inputinf)
 
 
 
 
-njobs=1
 
-nlen=np.ceil(tmax.shape[1]/np.float(njobs))
-patches=np.zeros((2,njobs))
-patches[0,:]=np.arange(njobs)*nlen
-patches[1,:]=np.arange(1,njobs+1)*nlen
-patches[1,-1]=lon.shape[0]
 
-TNp,TXp,tminp,tmaxp,tminpbs,tmaxpbs=Parallel(n_jobs=njobs)(delayed(em.calc_TX10p)(tmax[:,patches[0,i]:patches[1,i],:],tmin[:,patches[0,i]:patches[1,i],:],dates,inputinf) for i in xrange(njobs))
+njobs=10
+patches=em.roughly_split(range(tmax.shape[1]),njobs)
 
-em.write_fileout(TNp[0,:,:,:],"TN10p",otime_m,"%s%s.nc"%(fullpathin,"TN10p"),lat,lon,inputinf)
-em.write_fileout(TNp[1,:,:,:],"TN50p",otime_m,"%s%s.nc"%(fullpathin,"TN50p"),lat,lon,inputinf)
-em.write_fileout(TNp[2,:,:,:],"TN90p",otime_m,"%s%s.nc"%(fullpathin,"TN90p"),lat,lon,inputinf)
+
+if njobs>1:
+  
+  var_in=[(tmax[:,patches[0,0]:patches[1,0],:],tmin[:,patches[0,0]:patches[1,0],:],dates,inputinf)]
+  for proc in xrange(1,njobs):
+    var_in.append((tmax[:,patches[0,proc]:patches[1,proc],:],tmin[:,patches[0,proc]:patches[1,proc],:],dates,inputinf))
+  
+  all_var=Parallel(n_jobs=njobs)(delayed(em.calc_TX10p)(*var_in[i]) for i in xrange(njobs))
+  
+  TNp,TXp,tminp,tmaxp,tminpbs,tmaxpbs=zip(*all_var)
+  TNp=np.concatenate(TNp,axis=-2)
+  TXp=np.concatenate(TXp,axis=-2)
+  tminp=np.concatenate(tminp,axis=-2)
+  tmaxp=np.concatenate(tmaxp,axis=-2)
+  tminpbs=np.concatenate(tminpbs,axis=-2)
+  tmaxpbs=np.concatenate(tmaxpbs,axis=-2)
+
+else:
+  TNp,TXp,tminp,tmaxp,tminpbs,tmaxpbs=em.calc_TX10p(tmax,tmin,dates,inputinf)
+TNp[:,tmin_mask==True]=const.missingval
+TXp[:,tmax_mask==True]=const.missingval
+
+em.write_fileout(TNp[0,:,:,:],"TN10p",otime_m,"%s%s.nc"%(fullpathout,"TN10p"),lat,lon,inputinf)
+em.write_fileout(TNp[1,:,:,:],"TN50p",otime_m,"%s%s.nc"%(fullpathout,"TN50p"),lat,lon,inputinf)
+em.write_fileout(TNp[2,:,:,:],"TN90p",otime_m,"%s%s.nc"%(fullpathout,"TN90p"),lat,lon,inputinf)
                                                                              
-em.write_fileout(TXp[0,:,:,:],"TX10p",otime_m,"%s%s.nc"%(fullpathin,"TX10p"),lat,lon,inputinf)
-em.write_fileout(TXp[1,:,:,:],"TX50p",otime_m,"%s%s.nc"%(fullpathin,"TX50p"),lat,lon,inputinf)
-em.write_fileout(TXp[2,:,:,:],"TX90p",otime_m,"%s%s.nc"%(fullpathin,"TX90p"),lat,lon,inputinf)
+em.write_fileout(TXp[0,:,:,:],"TX10p",otime_m,"%s%s.nc"%(fullpathout,"TX10p"),lat,lon,inputinf)
+em.write_fileout(TXp[1,:,:,:],"TX50p",otime_m,"%s%s.nc"%(fullpathout,"TX50p"),lat,lon,inputinf)
+em.write_fileout(TXp[2,:,:,:],"TX90p",otime_m,"%s%s.nc"%(fullpathout,"TX90p"),lat,lon,inputinf)
 
 
 
@@ -199,8 +288,8 @@ em.write_fileout(TXp[2,:,:,:],"TX90p",otime_m,"%s%s.nc"%(fullpathin,"TX90p"),lat
 
 
 
-if int(inputinf['save_thres'])==1:
-    em.write_thresfile(fullpathin)
+if int(inputinf['save_thresholds'])==1:
+    em.write_thresfile(tminp,tmaxp,tminpbs,tmaxpbs,prec95,prec99,lat,lon,fullpathout,inputinf)
   
   
 

@@ -27,6 +27,8 @@ pathin="/srv/ccrc/data13/z3393020/Analyses/NARCliM/ForETCCDI/"
 outpatt="CCRC_NARCliM_DAY_"
 indeck="etccdi.nml.deck"
 
+thres_version='bootstrap'
+
 for gind,gname in enumerate(GCM_names):
   for rind,rname in enumerate(RCM_names):
     for pind,pname in enumerate(Period_names):
@@ -81,6 +83,7 @@ for gind,gname in enumerate(GCM_names):
                       '%time_username%':     "time",
                       '%is_thresfile%':      str(is_thresfile),
                       '%thres_filename%': thres_filename,
+                      '%thres_version%': thres_version,
                       '%is_rcm%':       str(1),
                       '%syear%':        str(int(pname[0:4])),
                       '%eyear%':        str(int(pname[5:9])-1),

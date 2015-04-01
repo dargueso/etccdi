@@ -16,7 +16,7 @@ lat_username=%lat_username%
 time_username=%time_username%
 is_thresfile=%is_thresfile%
 thres_filename=%thres_filename%
-
+thres_version=%thres_version%
 
 NoMissingThreshold=0.85
 stdspan=5

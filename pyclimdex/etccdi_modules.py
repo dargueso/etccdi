@@ -76,6 +76,23 @@ def calc_dates(syear,eyear):
 ###############################################
 ###############################################
 
+def calc_qualitymask(var,years,inputinf):
+  """
+  Function to mask out years without enough data according to NoMissingThreshold
+  """
+  missthres=float(inputinf['NoMissingThreshold'])
+  
+  nyears=years[-1]-years[0]+1
+  quality_mask=np.zeros((nyears,)+var.shape[1:],dtype=np.bool)
+  for yr in range(nyears):
+    year=years[0]+yr
+    quality_mask[yr,:,:]=(np.sum(var[years==year].mask,axis=0)/float(np.sum(years==year)))>(1.-missthres)
+  return quality_mask
+
+
+###############################################
+###############################################
+
 def calc_otime(years,mode):
 	"""
 	Function to calculate the time vector to write the netCDF
@@ -191,7 +208,6 @@ def calc_R10mm(prec,years,Rnnmm_t):
     SDII[yr,:,:]=np.ma.sum(prec1mm,axis=0)/days1mm.astype('float')
     
     
-
     
   return R10mm, R20mm, Rnnmm,SDII
 
@@ -242,6 +258,8 @@ def calc_R95p(prec,years,inputinf):
   R95p=np.ones((nyears,)+prec.shape[1:],dtype=np.float)*const.missingval
   R99p=np.ones((nyears,)+prec.shape[1:],dtype=np.float)*const.missingval
   PRCPtot=np.ones((nyears,)+prec.shape[1:],dtype=np.float)*const.missingval
+  prec95=np.ones(prec.shape[1:],dtype=np.float)*const.missingval
+  prec99=np.ones(prec.shape[1:],dtype=np.float)*const.missingval
   
   if is_thresfile==0:
     print "No threshold file required. Percentiles will be calculated (precip)"
@@ -249,10 +267,10 @@ def calc_R95p(prec,years,inputinf):
     for i in range(prec.shape[1]):
       for j in range(prec.shape[2]):
         prec_base=prec[(years>=bsyear) & (years<=beyear),i,j]
-        prec_base_1mm=np.ma.masked_less_equal(prec_base,1.)
-        
-        prec95[i,j]=numpy.percentiles(prec_base_rain[~prec_base_rain.mask],95,axis=0)
-        prec99[i,j]=numpy.percentiles(prec_base_rain[~prec_base_rain.mask],99,axis=0)
+        prec_base_rain=np.ma.masked_less_equal(prec_base,1.)
+        if np.count_nonzero(~prec_base_rain.mask)!=0:
+          prec95[i,j]=np.percentile(prec_base_rain[~prec_base_rain.mask],95,axis=0)
+          prec99[i,j]=np.percentile(prec_base_rain[~prec_base_rain.mask],99,axis=0)
     
     
   elif is_thresfile==1:
@@ -268,9 +286,15 @@ def calc_R95p(prec,years,inputinf):
   
   for yr in range(nyears):
     year=years[0]+yr
-    R95p[yr,:,:] = np.ma.sum(prec[prec[years==year,:,:]>prec95],axis=0)
-    R99p[yr,:,:] = np.ma.sum(prec[prec[years==year,:,:]>prec99],axis=0)
-    PRCPtot[yr,:,:] = np.ma.sum(prec[prec[years==year,:,:]>1.],axis=0)
+
+    for i in range(prec.shape[1]):
+      for j in range(prec.shape[2]):
+        aux=prec[years==year,i,j]
+        aux95=aux>prec95[i,j]
+        aux99=aux>prec99[i,j]
+        R95p[yr,i,j] = np.ma.sum(aux[aux95],axis=0)
+        R99p[yr,i,j] = np.ma.sum(aux[aux99],axis=0)
+        PRCPtot[yr,i,j] = np.ma.sum(aux[aux>1.],axis=0)
   
   
     
@@ -288,6 +312,8 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
   bsyear = int(inputinf['basesyear'])
   beyear = int(inputinf['baseeyear'])
   byrs = beyear-bsyear+1
+  version = inputinf['thres_version']
+  print version
   
   print "Processing TN10p,TN50p,TN90p,TX10p,TX50p,TX90p ..."
   years_all=np.asarray([dates[i].year for i in xrange(len(dates))])
@@ -300,17 +326,22 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
   months=np.asarray([dates[i].month for i in xrange(len(dates))])  
   days=np.asarray([dates[i].day for i in xrange(len(dates))])
   
+  months_clim=months[:365]
+  
   tmax=tmax[((months_all==2) & (days_all==29))==False,:,:]
   tmin=tmin[((months_all==2) & (days_all==29))==False,:,:]
   
   tmax_base=tmax[(years>=bsyear) & (years<=beyear),:,:]
   tmin_base=tmin[(years>=bsyear) & (years<=beyear),:,:]
+  years_base=years[(years>=bsyear) & (years<=beyear)]
   
   nyears=years[-1]-years[0]+1
   
   
   TXp = np.zeros((3,nyears*12,)+tmax.shape[1:],dtype=np.float)
   TNp = np.zeros((3,nyears*12,)+tmax.shape[1:],dtype=np.float)
+  tminp=np.ones((365,3)+tmin.shape[1:],dtype=np.float)*const.missingval
+  tmaxp=np.ones((365,3)+tmin.shape[1:],dtype=np.float)*const.missingval
   tminpbs=np.ones((byrs,365,3)+tmin.shape[1:],dtype=np.float)*const.missingval
   tmaxpbs=np.ones((byrs,365,3)+tmin.shape[1:],dtype=np.float)*const.missingval
  
@@ -318,56 +349,109 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
 
   
   if is_thresfile==0:
-    print "No threshold file required. Percentiles will be calculated (temp)"
-    print "A bootstrap will be carried out. This part take most of the time"
+    if version=='bootstrap':
+      print "No threshold file required. Percentiles will be calculated (temp)"
+      print "A bootstrap will be carried out. This part take most of the time"
     
     
-    tminp=calc_thres(tmin_base,years,bsyear,beyear)
-    tmaxp=calc_thres(tmax_base,years,bsyear,beyear)
+      tminp=calc_thres(tmin_base,byrs)
+      tmaxp=calc_thres(tmax_base,byrs)
     
-    for yr in range(byrs+1):
-      print "year: %s" %(yr+bsyear)
-      tmax_boot=tmax_base.copy()
-      tmin_boot=tmin_base.copy()
-      for yr_iter in range(byrs+1):
-        if (yr_iter!=yr):
-          tmax_boot[years==yr+bsyear,:,:]=tmax_boot[years==yr_iter+bsyear,:,:]
-          tmin_boot[years==yr+bsyear,:,:]=tmin_boot[years==yr_iter+bsyear,:,:]
+      for yr in range(byrs):
+        print "year: %s" %(yr+bsyear)
+        tmax_boot=tmax_base.copy()
+        tmin_boot=tmin_base.copy()
+        for yr_iter in range(byrs):
+          if (yr_iter!=yr):
+            tmax_boot[years_base==yr+bsyear,:,:]=tmax_boot[years_base==yr_iter+bsyear,:,:]
+            tmin_boot[years_base==yr+bsyear,:,:]=tmin_boot[years_base==yr_iter+bsyear,:,:]
+      
+          tminpbs[yr,:,:,:,:]=calc_thres(tmin_boot,byrs)
+          tmaxpbs[yr,:,:,:,:]=calc_thres(tmax_boot,byrs)
+    
+    elif version=='all_years':
+      print "No threshold file required. Percentiles will be calculated (temp)"
+      print "All years wihtin the base period will be used for all years (no boostrap or other method selected)"
+      
+      tminp=calc_thres(tmin_base,byrs)
+      tmaxp=calc_thres(tmax_base,byrs)
+      
+    elif version=='exclude_year':
+      print "No threshold file required. Percentiles will be calculated (temp)"
+      print "Each of the base period years will be removed at once and the percentile calculated"
+      print "Similar to bootstrap but faster, although not as robust."
+      
+      tminp=calc_thres(tmin_base,byrs)
+      tmaxp=calc_thres(tmax_base,byrs)
+      
+      for yr in range(byrs):
+        print "year: %s" %(yr+bsyear)
+        tmax_boot=tmax_base[years_base!=yr+bsyear,:,:].copy()
+        tmin_boot=tmin_base[years_base!=yr+bsyear,:,:].copy()
         
-        tminpbs[yr,:,:,:,:]=calc_thres(tmin_boot,years,bsyear,beyear)
-        tmaxpbs[yr,:,:,:,:]=calc_thres(tmax_boot,years,bsyear,beyear)
+        tminpbs[yr,:,:,:,:]=calc_thres(tmin_boot,byrs-1)
+        tmaxpbs[yr,:,:,:,:]=calc_thres(tmax_boot,byrs-1)
+    
+    else:
+      
+      print "Method to calculate the thresholds not supported. It must be one of the following: "
+      print "bootstrap all_years exclude_year"
+      sys.exit("ERROR: No valid threshold method chosen")
+      
+      
+      
     
 
     for yr in range(nyears):
       year=years[0]+yr
       
-      if (year<bsyear) or (year>beyear):
-        #Out of the base period
+      if version=="all_years":
         for month in range(1,13):
           index_ym=yr*12+month-1
-          TNp[0,index_ym,:,:]=np.ma.sum(tmin[(years==year & months==month),:,:]<tminp[:,0,:,:],axis=0)
-          TNp[1,index_ym,:,:]=np.ma.sum(tmin[(years==year & months==month),:,:]>tminp[:,1,:,:],axis=0)
-          TNp[2,index_ym,:,:]=np.ma.sum(tmin[(years==year & months==month),:,:]>tminp[:,2,:,:],axis=0)
+          TNp[0,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminp[months_clim==month,0,:,:],axis=0)
+          TNp[1,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminp[months_clim==month,1,:,:],axis=0)
+          TNp[2,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminp[months_clim==month,2,:,:],axis=0)
+
+          TXp[0,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxp[months_clim==month,0,:,:],axis=0)
+          TXp[1,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxp[months_clim==month,1,:,:],axis=0)
+          TXp[2,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxp[months_clim==month,2,:,:],axis=0)
+      
+      
+      if version in ['bootstrap','exclude_year']: 
+      
+        if (year<bsyear) or (year>beyear):
+          #Out of the base period
+          for month in range(1,13):
+            index_ym=yr*12+month-1
+            #pdb.set_trace()
+            TNp[0,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminp[months_clim==month,0,:,:],axis=0)
+            TNp[1,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminp[months_clim==month,1,:,:],axis=0)
+            TNp[2,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminp[months_clim==month,2,:,:],axis=0)
           
-          TXp[0,index_ym,:,:]=np.ma.sum(tmin[(years==year & months==month),:,:]<tmaxp[:,0,:,:],axis=0)
-          TXp[1,index_ym,:,:]=np.ma.sum(tmin[(years==year & months==month),:,:]>tmaxp[:,1,:,:],axis=0)
-          TXp[2,index_ym,:,:]=np.ma.sum(tmin[(years==year & months==month),:,:]>tmaxp[:,2,:,:],axis=0)
+            TXp[0,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxp[months_clim==month,0,:,:],axis=0)
+            TXp[1,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxp[months_clim==month,1,:,:],axis=0)
+            TXp[2,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxp[months_clim==month,2,:,:],axis=0)
         
-      else:
-        #Within the base period
-        for yr_iter in range(byrs):
-          if yr_iter!=yr:
-            TNp[0,index_ym,:,:]=TNp[0,index_ym,:,:]+np.ma.sum(tmin[(years==year & months==month),:,:]<tminpbs[yr_iter,:,0,:,:],axis=0)
-            TNp[1,index_ym,:,:]=TNp[1,index_ym,:,:]+np.ma.sum(tmin[(years==year & months==month),:,:]>tminpbs[yr_iter,:,1,:,:],axis=0)
-            TNp[2,index_ym,:,:]=TNp[2,index_ym,:,:]+np.ma.sum(tmin[(years==year & months==month),:,:]>tminpbs[yr_iter,:,2,:,:],axis=0)
+        elif (year>=bsyear) and (year<=beyear):
+          #Within the base period
+          for month in range(1,13):
+            index_ym=yr*12+month-1
+            for yr_iter in range(byrs):
+              if yr_iter!=yr:
+                index_ym=yr*12+month-1
+  
+                TNp[0,index_ym,:,:]=TNp[0,index_ym,:,:]+np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminpbs[yr_iter,months_clim==month,0,:,:],axis=0)
+                TNp[1,index_ym,:,:]=TNp[1,index_ym,:,:]+np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminpbs[yr_iter,months_clim==month,1,:,:],axis=0)
+                TNp[2,index_ym,:,:]=TNp[2,index_ym,:,:]+np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminpbs[yr_iter,months_clim==month,2,:,:],axis=0)
           
-            TXp[0,index_ym,:,:]=TXp[0,index_ym,:,:]+np.ma.sum(tmax[(years==year & months==month),:,:]<tmaxpbs[yr_iter,:,0,:,:],axis=0)
-            TXp[1,index_ym,:,:]=TXp[1,index_ym,:,:]+np.ma.sum(tmax[(years==year & months==month),:,:]>tmaxpbs[yr_iter,:,1,:,:],axis=0)
-            TXp[2,index_ym,:,:]=TXp[2,index_ym,:,:]+np.ma.sum(tmax[(years==year & months==month),:,:]>tmaxpbs[yr_iter,:,2,:,:],axis=0)
+                TXp[0,index_ym,:,:]=TXp[0,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxpbs[yr_iter,months_clim==month,0,:,:],axis=0)
+                TXp[1,index_ym,:,:]=TXp[1,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxpbs[yr_iter,months_clim==month,1,:,:],axis=0)
+                TXp[2,index_ym,:,:]=TXp[2,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxpbs[yr_iter,months_clim==month,2,:,:],axis=0)
           
         
-        TNp[:,index_ym,:,:]=TNp[:,index_ym,:,:]/float(byrs-1)                            
-        TXp[:,index_ym,:,:]=TXp[:,index_ym,:,:]/float(byrs-1)
+            TNp[:,index_ym,:,:]=TNp[:,index_ym,:,:]/float(byrs-1)                            
+            TXp[:,index_ym,:,:]=TXp[:,index_ym,:,:]/float(byrs-1)
+        
 
 
     
@@ -390,25 +474,25 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
         #Out of the base period
         for month in range(1,13):
           index_ym=yr*12+month-1
-          TNp[0,index_ym,:,:]=np.ma.sum(tmin[(years==year & months==month),:,:]<tminp[:,0,:,:],axis=0)
-          TNp[1,index_ym,:,:]=np.ma.sum(tmin[(years==year & months==month),:,:]>tminp[:,1,:,:],axis=0)
-          TNp[2,index_ym,:,:]=np.ma.sum(tmin[(years==year & months==month),:,:]>tminp[:,2,:,:],axis=0)
+          TNp[0,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminp[months_clim==month,0,:,:],axis=0)
+          TNp[1,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminp[months_clim==month,1,:,:],axis=0)
+          TNp[2,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminp[months_clim==month,2,:,:],axis=0)
           
-          TXp[0,index_ym,:,:]=np.ma.sum(tmax[(years==year & months==month),:,:]<tmaxp[:,0,:,:],axis=0)
-          TXp[1,index_ym,:,:]=np.ma.sum(tmax[(years==year & months==month),:,:]>tmaxp[:,1,:,:],axis=0)
-          TXp[2,index_ym,:,:]=np.ma.sum(tmax[(years==year & months==month),:,:]>tmaxp[:,2,:,:],axis=0)
+          TXp[0,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxp[months_clim==month,0,:,:],axis=0)
+          TXp[1,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxp[months_clim==month,1,:,:],axis=0)
+          TXp[2,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxp[months_clim==month,2,:,:],axis=0)
         
       else:
         #Within the base period
         for yr_iter in range(byrs):
           if yr_iter!=yr:
-              TNp[0,index_ym,:,:]=TNp[0,index_ym,:,:]+np.ma.sum(tmin[(years==year & months==month),:,:]<tminpbs[yr_iter,:,0,:,:],axis=0) #CHECK ALL THIS (THE MONTHS STUFF WILL GIVE AN ERROR! BECAUSE OF THE SIZE)
-              TNp[1,index_ym,:,:]=TNp[1,index_ym,:,:]+np.ma.sum(tmin[(years==year & months==month),:,:]>tminpbs[yr_iter,:,1,:,:],axis=0)
-              TNp[2,index_ym,:,:]=TNp[2,index_ym,:,:]+np.ma.sum(tmin[(years==year & months==month),:,:]>tminpbs[yr_iter,:,2,:,:],axis=0)
+              TNp[0,index_ym,:,:]=TNp[0,index_ym,:,:]+np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminpbs[yr_iter,months_clim==month,0,:,:],axis=0) #CHECK ALL THIS (THE MONTHS STUFF WILL GIVE AN ERROR! BECAUSE OF THE SIZE)
+              TNp[1,index_ym,:,:]=TNp[1,index_ym,:,:]+np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminpbs[yr_iter,months_clim==month,1,:,:],axis=0)
+              TNp[2,index_ym,:,:]=TNp[2,index_ym,:,:]+np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminpbs[yr_iter,months_clim==month,2,:,:],axis=0)
           
-              TXp[0,index_ym,:,:]=TXp[0,index_ym,:,:]+np.ma.sum(tmax[(years==year & months==month),:,:]<tmaxpbs[yr_iter,:,0,:,:],axis=0)
-              TXp[1,index_ym,:,:]=TXp[1,index_ym,:,:]+np.ma.sum(tmax[(years==year & months==month),:,:]>tmaxpbs[yr_iter,:,1,:,:],axis=0)
-              TXp[2,index_ym,:,:]=TXp[2,index_ym,:,:]+np.ma.sum(tmax[(years==year & months==month),:,:]>tmaxpbs[yr_iter,:,2,:,:],axis=0)
+              TXp[0,index_ym,:,:]=TXp[0,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxpbs[yr_iter,months_clim==month,0,:,:],axis=0)
+              TXp[1,index_ym,:,:]=TXp[1,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxpbs[yr_iter,months_clim==month,1,:,:],axis=0)
+              TXp[2,index_ym,:,:]=TXp[2,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxpbs[yr_iter,months_clim==month,2,:,:],axis=0)
           
         
         TNp[:,index_ym,:,:]=TNp[:,index_ym,:,:]/float(byrs-1)                    
@@ -418,17 +502,14 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
     
   else:
     sys.exit("ERROR:Wrong entry for is_thresfile (0/1)") 
-    
   return TNp,TXp,tminp,tmaxp,tminpbs,tmaxpbs
   
 ###############################################
 ###############################################
 
-def calc_thres(varin,years,bsyear,beyear):
+def calc_thres(varin,byrs):
     
     
-    var_base=varin[(years>=bsyear) & (years<=beyear),:,:]
-    byrs=beyear-bsyear+1
     varinp=np.ones((365,3)+varin.shape[1:],dtype=np.float64)
     doy_s=np.tile(np.arange(365),byrs)
     use_doy=np.zeros(doy_s.shape,dtype=np.int)
@@ -440,12 +521,21 @@ def calc_thres(varin,years,bsyear,beyear):
         use_doy[(doy_s<init_d) & (doy_s>=end_d)]=0
       else:
         use_doy[(doy_s<init_d) | (doy_s>=end_d)]=0
-      varinp[d,:,:,:]=np.asarray(np.percentile(var_base[use_doy==1,:,:],[10,50,90],axis=0))
+      varinp[d,:,:,:]=np.asarray(np.percentile(varin[use_doy==1,:,:],[10,50,90],axis=0))
       
       
     return varinp
         
-        
+###############################################
+###############################################
+
+def roughly_split(a, n):
+  "Function to divide a list into roughly equal chunks - to be used in joblib"
+  chunks=np.zeros((2,n))
+  k, m = len(a) / n, len(a) % n
+  chunks[0,:]=np.array(list( i * k + min(i, m) for i in xrange(n)))
+  chunks[1,:]=np.array(list((i + 1) * k + min(i + 1, m) for i in xrange(n)))
+  return chunks       
 
 ###############################################
 ###############################################
@@ -462,19 +552,19 @@ def write_fileout(ovar,varname,otime,out_file,lat,lon,inputinf):
   print "Writing out %s file..." %(varname)
   outfile=nc.Dataset(out_file,mode="w")
   outfile.createDimension('time',None)
-  outfile.createDimension('y',ovar.shape[1])
-  outfile.createDimension('x',ovar.shape[2])
+  outfile.createDimension('lat',ovar.shape[1])
+  outfile.createDimension('lon',ovar.shape[2])
   
-  outvar=outfile.createVariable(varname,'f4',('time','y','x'),fill_value=const.missingval)
-  outlat=outfile.createVariable('lat','f4',('y','x'),fill_value=const.missingval)
-  outlon=outfile.createVariable('lon','f4',('y','x'),fill_value=const.missingval)
+  outvar=outfile.createVariable(varname,'f4',('time','lat','lon'),fill_value=const.missingval)
+  outlat=outfile.createVariable('lat','f4',('lat','lon'),fill_value=const.missingval)
+  outlon=outfile.createVariable('lon','f4',('lat','lon'),fill_value=const.missingval)
   outtime=outfile.createVariable('time','f4',('time'),fill_value=const.missingval)
   
   outvar[:]=ovar[:]
   outlat[:]=lat[:]
   outlon[:]=lon[:]
 
-  outtime[:]=nc.date2num(otime,units='days since %s' %(nc.datetime.strftime(dt.datetime(1949,01,01,00), '%Y-%m-%d_%H:%M:%S')),calendar='standard')
+  outtime[:]=nc.date2num(otime,units='days since %s' %(nc.datetime.strftime(dt.datetime(1949,01,01,00), '%Y-%m-%d %H:%M:%S')),calendar='standard')
   
   setattr(outvar,"units",varinfo.get_units(varname))
   setattr(outvar,"long_name",varinfo.get_longname(varname))
@@ -482,26 +572,25 @@ def write_fileout(ovar,varname,otime,out_file,lat,lon,inputinf):
     setattr(outvar,"long_name","Days with rainfall larger than %smm" %(inputinf['Rnmm']))
   
   setattr(outlat,"standard_name","latitude")
-  setattr(outlat,"long_name","Latitude")
+  setattr(outlat,"long_name","latitude")
   setattr(outlat,"units","degrees_north")
-  setattr(outlat,"_CoordinateAxisType","Lat")
   setattr(outlat,"axis","Y")
   
   setattr(outlon,"standard_name","longitude")
-  setattr(outlon,"long_name","Longitude")
+  setattr(outlon,"long_name","longitude")
   setattr(outlon,"units","degrees_east")
-  setattr(outlon,"_CoordinateAxisType","Lon")
   setattr(outlon,"axis","X")
   
   setattr(outtime,"standard_name","time")
   setattr(outtime,"long_name","Time")
-  setattr(outtime,"units","days since %s" %(nc.datetime.strftime(dt.datetime(1949,01,01,00), '%Y-%m-%d_%H:%M:%S')))
+  setattr(outtime,"units","days since %s" %(nc.datetime.strftime(dt.datetime(1949,01,01,00), '%Y-%m-%d %H:%M:%S')))
   setattr(outtime,"calendar","standard")
 
   setattr(outfile,'date',dt.date.today().strftime('%Y-%m-%d'))
   setattr(outfile,'author','Daniel Argueso @CCRC UNSW')
   setattr(outfile,'contact','d.argueso@unsw.edu.au')
   setattr(outfile,'comments','Base period: %s-%s' %(inputinf['basesyear'],inputinf['baseeyear']))
+  setattr(outfile,'method', 'Method to calculate thresholds: %s' %(inputinf['thres_version']))
   
   outfile.close()
   
@@ -509,35 +598,35 @@ def write_fileout(ovar,varname,otime,out_file,lat,lon,inputinf):
 ###############################################
 
 
-def write_thresfilet(outpath,otime,inputinf):
+def write_thresfile(tminp,tmaxp,tminpbs,tmaxpbs,prec95,prec99,lat,lon,outpath,inputinf):
   
   """
   Function to write out a netcdf file with the extreme variables
 
   """
   #global tmax10bs,tmax50bs,tmax90bs,tmin10bs,tmin50bs,tmin90bs,tmax10,tmax50,tmax90,tmax10,tmax50,tmax90,prec95,prec99
-  print "Writing out %s file..." %(varname)
-  outfile=nc.Dataset("%s_thresholds.nc" %(outpath),mode="w")
+  print "Writing out thresholds file..." 
+  outfile=nc.Dataset("%sthresholds.nc" %(outpath),mode="w")
   outfile.createDimension('time',None)
-  outfile.createDimennsion('DoY',365)
-  outfile.createDimennsion('perc',3)
-  outfile.createDimension('y',ovar.shape[1])
-  outfile.createDimension('x',ovar.shape[2])
+  outfile.createDimension('DoY',365)
+  outfile.createDimension('perc',3)
+  outfile.createDimension('lat',lat.shape[0])
+  outfile.createDimension('lon',lat.shape[1])
   
-  outvar_xpbs=outfile.createVariable('tmaxpbs','f4',('time','Doy','perc','y','x'),fill_value=const.missingval)
-  outvar_npbs=outfile.createVariable('tminpbs','f4',('time','Doy','perc','y','x'),fill_value=const.missingval)
+  outvar_xpbs=outfile.createVariable('tmaxpbs','f4',('time','DoY','perc','lat','lon'),fill_value=const.missingval)
+  outvar_npbs=outfile.createVariable('tminpbs','f4',('time','DoY','perc','lat','lon'),fill_value=const.missingval)
   
 
   
-  outvar_x=outfile.createVariable('tmaxp','f4',('Doy','perc','y','x'),fill_value=const.missingval)
-  outvar_n=outfile.createVariable('tminp','f4',('Doy','perc','y','x'),fill_value=const.missingval) 
+  outvar_x=outfile.createVariable('tmaxp','f4',('DoY','perc','lat','lon'),fill_value=const.missingval)
+  outvar_n=outfile.createVariable('tminp','f4',('DoY','perc','lat','lon'),fill_value=const.missingval) 
 
   
-  outvar_p95=outfile.createVariable('prec95','f4',('y','x'),fill_value=const.missingval)
-  outvar_p99=outfile.createVariable('prec99','f4',('y','x'),fill_value=const.missingval)
+  outvar_p95=outfile.createVariable('prec95','f4',('lat','lon'),fill_value=const.missingval)
+  outvar_p99=outfile.createVariable('prec99','f4',('lat','lon'),fill_value=const.missingval)
   
-  outlat=outfile.createVariable('lat','f4',('y','x'),fill_value=const.missingval)
-  outlon=outfile.createVariable('lon','f4',('y','x'),fill_value=const.missingval)
+  outlat=outfile.createVariable('lat','f4',('lat','lon'),fill_value=const.missingval)
+  outlon=outfile.createVariable('lon','f4',('lat','lon'),fill_value=const.missingval)
   outtime=outfile.createVariable('time','f4',('time'),fill_value=const.missingval)
   
   outvar_xpbs[:]=tmaxpbs[:]
@@ -552,23 +641,26 @@ def write_thresfilet(outpath,otime,inputinf):
   outlat[:]=lat[:]
   outlon[:]=lon[:]
 
-  outtime[:]=nc.date2num(otime,units='days since %s' %(nc.datetime.strftime(dt.datetime(1949,01,01,00), '%Y-%m-%d_%H:%M:%S')),calendar='standard')
+  bsyear = int(inputinf['basesyear'])
+  beyear = int(inputinf['baseeyear'])
+  byrs = beyear-bsyear+1
+  
+  otime= [dt.datetime(bsyear+x,06,01,00) for x in range(0,byrs)]
+  outtime[:]=nc.date2num(otime,units='days since %s' %(nc.datetime.strftime(dt.datetime(1949,01,01,00), '%Y-%m-%d %H:%M:%S')),calendar='standard')
   
   setattr(outlat,"standard_name","latitude")
-  setattr(outlat,"long_name","Latitude")
+  setattr(outlat,"long_name","latitude")
   setattr(outlat,"units","degrees_north")
-  setattr(outlat,"_CoordinateAxisType","Lat")
   setattr(outlat,"axis","Y")
   
   setattr(outlon,"standard_name","longitude")
-  setattr(outlon,"long_name","Longitude")
+  setattr(outlon,"long_name","longitude")
   setattr(outlon,"units","degrees_east")
-  setattr(outlon,"_CoordinateAxisType","Lon")
   setattr(outlon,"axis","X")
   
   setattr(outtime,"standard_name","time")
   setattr(outtime,"long_name","Time")
-  setattr(outtime,"units","days since %s" %(nc.datetime.strftime(dt.datetime(1949,01,01,00), '%Y-%m-%d_%H:%M:%S')))
+  setattr(outtime,"units","days since %s" %(nc.datetime.strftime(dt.datetime(1949,01,01,00), '%Y-%m-%d %H:%M:%S')))
   setattr(outtime,"calendar","standard")
 
   setattr(outfile,'date',dt.date.today().strftime('%Y-%m-%d'))

@@ -1,11 +1,14 @@
 #Namelist for fclimdex.py
 
-inpath=/srv/ccrc/data13/z3393020/Analyses/NARCliM/ForETCCDI//MIROC3.2/R1/2060-2080/d01
-outpath=/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Python//MIROC3.2/R1/1990-2010/d01///MIROC3.2/R1/1990-2010/d02///MIROC3.2/R1/2020-2040/d01///MIROC3.2/R1/2020-2040/d02///MIROC3.2/R1/2060-2080/d01//
+inpath_temp=/srv/ccrc/data30/z3393020/NARCliM/postprocess/1990-2009/MIROC3.2/R1//d01
+inpath_prec=/srv/ccrc/data30/z3393020/NARCliM/filtered/MIROC3.2/R1/1990-2010//d01
+outpath=/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Python//MIROC3.2/R1/1990-2010/d01//
+inpattern=CCRC_NARCliM_DAY_
+data_source=NARCLIM
 
-file_prec=CCRC_NARCliM_DAY_2060-2080_pracc_fl.nc
-file_tmax=CCRC_NARCliM_DAY_2060-2080_tasmax.nc
-file_tmin=CCRC_NARCliM_DAY_2060-2080_tasmin.nc
+file_prec=CCRC_NARCliM_DAY_*_pracc_fl.nc
+file_tmax=CCRC_NARCliM_DAY_*_tasmax.nc
+file_tmin=CCRC_NARCliM_DAY_*_tasmin.nc
 
 prec_name=pracc_fl
 tmax_name=tasmax
@@ -14,9 +17,9 @@ tmin_name=tasmin
 lon_username=lon
 lat_username=lon
 time_username=time
-is_thresfile=1
-thres_filename=/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Python//MIROC3.2/R1/1990-2010/d01///MIROC3.2/R1/1990-2010/d02///MIROC3.2/R1/2020-2040/d01///MIROC3.2/R1/2020-2040/d02///MIROC3.2/R1/2060-2080/d01///MIROC3.2/R1/1990-2010/d01/CCRC_NARCliM_DAY__1990-2009_thresholds.nc
-
+is_thresfile=0
+thres_filename=
+thres_version=bootstrap
 
 NoMissingThreshold=0.85
 stdspan=5
@@ -25,14 +28,14 @@ baseeyear=2009
 Rnnmm=25
 
 
-syear=2060
-eyear=2079
+syear=1990
+eyear=2009
 
 outname="CCRC_NARCliM_"
 
 save_thresholds=1
 sub_folder=0
-log_file=ETCCDI_MIROC3.2_R1_2060-2080_d01_.log
+log_file=ETCCDI_MIROC3.2_R1_1990-2010_d01_.log
 
 is_rcm=1
 

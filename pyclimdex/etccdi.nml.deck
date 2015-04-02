@@ -1,7 +1,10 @@
 #Namelist for fclimdex.py
 
-inpath=%inpath%
+inpath_prec=%inpath_prec%
+inpath_temp=%inpath_temp%
 outpath=%outpath%
+inpattern=%inpattern%
+data_source=%data_source%
 
 file_prec=%file_prec%
 file_tmax=%file_tmax%

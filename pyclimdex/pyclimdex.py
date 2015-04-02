@@ -49,9 +49,9 @@ otime_m = em.calc_otime(years,"months")
 print "Loading precipitation file..."
 
 
-filepr = nc.Dataset("%s/%s"%(inputinf['inpath'],inputinf['file_prec']),"r")
+filepr = nc.Dataset("%s/%s"%(inputinf['inpath_prec'],inputinf['file_prec']),"r")
 
-print "Loading ... %s/%s"%(inputinf['inpath'],inputinf['file_prec'])
+print "Loading ... %s/%s"%(inputinf['inpath_prec'],inputinf['file_prec'])
 prec = filepr.variables[inputinf['prec_name']][:]
 
 time = filepr.variables[inputinf['time_username']][:]
@@ -133,15 +133,15 @@ filepr.close()
 
 
 print "Loading temp files..."
-filetx = nc.Dataset("%s/%s"%(inputinf['inpath'],inputinf['file_tmax']),"r")
-filetn = nc.Dataset("%s/%s"%(inputinf['inpath'],inputinf['file_tmin']),"r")
+filetx = nc.Dataset("%s/%s"%(inputinf['inpath_temp'],inputinf['file_tmax']),"r")
+filetn = nc.Dataset("%s/%s"%(inputinf['inpath_temp'],inputinf['file_tmin']),"r")
 
 
-print "Loading ... %s/%s"%(inputinf['inpath'],inputinf['file_tmax'])
+print "Loading ... %s/%s"%(inputinf['inpath_temp'],inputinf['file_tmax'])
 tmax = filetx.variables[inputinf['tmax_name']][:]
 tmax_units=filetx.variables[inputinf['tmax_name']].units
 
-print "Loading ... %s/%s"%(inputinf['inpath'],inputinf['file_tmin'])
+print "Loading ... %s/%s"%(inputinf['inpath_temp'],inputinf['file_tmin'])
 tmin = filetn.variables[inputinf['tmin_name']][:]
 tmin_units=filetn.variables[inputinf['tmin_name']].units
 
@@ -163,13 +163,14 @@ if ((len(lon.shape)==1) & (len(lat.shape)==1)):
     tmax=tmax[:,::-1,:]
     tmin=tmin[:,::-1,:]
     
-    newlon=lon.repeat(lat.shape[0])
-    newlon=np.resize(newlon,(lon.shape[0],lat.shape[0])).T
-    newlat=lat.repeat(lon.shape[0])
-    newlat=np.resize(newlat,(lat.shape[0],lon.shape[0]))
-    lon=newlon.copy()
-    lat=newlat.copy()
-
+  newlon=lon.repeat(lat.shape[0])
+  newlon=np.resize(newlon,(lon.shape[0],lat.shape[0])).T
+  newlat=lat.repeat(lon.shape[0])
+  newlat=np.resize(newlat,(lat.shape[0],lon.shape[0]))
+  lon=newlon.copy()
+  lat=newlat.copy()
+print lat.shape
+print lon.shape
 # if (tmax.shape[1:]!=lon.shape) or (tmin.shape[1:]!=lon.shape) or (lat.shape!=lon.shape):
 #     sys.exit("ERROR: Coordinate dimensions in temperature do not coincide with lat/lon size (from prec file). Check dimensions for all variables")
 # if (tmax.shape[0]!=len(time)):

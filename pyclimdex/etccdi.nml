@@ -1,11 +1,15 @@
-#Namelist for fclimdex.py
+#Namelist for pyclimdex.py
 
-inpath=/home/z3393020/Analyses/AWAP/AWAP0.5deg/
-outpath=/home/z3393020/Analyses/NARCliM/ETCCDI/AWAP/AWAP_0.5deg_pyclimdex/1990-2009/
+inpath_prec=/home/z3393020/Analyses/AWAP/downloaded/DAILY/
+inpath_temp=/home/z3393020/Analyses/AWAP/downloaded/DAILY/
+outpath=/home/z3393020/Analyses/NARCliM/ETCCDI/AWAP/AWAP_0.05deg/1990-2009
+inpattern=""
+data_source="AWAP"
 
-file_prec=AWAP_PRCP_1990-2010_0.5deg.nc
-file_tmax=AWAP_TX_1990-2010_0.5deg.nc
-file_tmin=AWAP_TN_1990-2010_0.5deg.nc
+
+file_prec=pre.nc
+file_tmax=tmax.nc
+file_tmin=tmin.nc
 prec_name=pre
 tmax_name=tmax
 tmin_name=tmin

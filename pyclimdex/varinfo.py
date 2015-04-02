@@ -30,12 +30,12 @@ class VariablesInfo(object):
 				'PRCPtot' :{'units': 'mm','long_name':'Total accumulated preciptiation'},
 				'Rx5day':{'units': 'mm','long_name':'5-day maximum accumulated preciptiation'},
 				'Rx1day':{'units': 'mm','long_name':'Daily maximum preciptiation'},
-				'TX10p':{'units': 'days','long_name':'No. days tmax below 10th percentile'},
-				'TX50p':{'units': 'days','long_name':'No. days tmax above 50th percentile'},
-				'TX90p':{'units': 'days','long_name':'No. days tmax above 90th percentile'},
-				'TN10p':{'units': 'days','long_name':'No. days tmin below 10th percentile'},
-				'TN50p':{'units': 'days','long_name':'No. days tmin above 50th percentile'},
-				'TN90p':{'units': 'days','long_name':'No. days tmin above 90th percentile'},
+				'TX10p':{'units': '%','long_name':'Percentage of days tmax below 10th percentile'},
+				'TX50p':{'units': '%','long_name':'Percentage of days tmax above 50th percentile'},
+				'TX90p':{'units': '%','long_name':'Percentage of days tmax above 90th percentile'},
+				'TN10p':{'units': '%','long_name':'Percentage of days tmin below 10th percentile'},
+				'TN50p':{'units': '%','long_name':'Percentage of days tmin above 50th percentile'},
+				'TN90p':{'units': '%','long_name':'Percentage of days tmin above 90th percentile'},
 				
                 }
                 

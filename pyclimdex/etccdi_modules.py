@@ -326,7 +326,6 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
   months=np.asarray([dates[i].month for i in xrange(len(dates))])  
   days=np.asarray([dates[i].day for i in xrange(len(dates))])
   
-  months_clim=months[:365]
   
   tmax=tmax[((months_all==2) & (days_all==29))==False,:,:]
   tmin=tmin[((months_all==2) & (days_all==29))==False,:,:]
@@ -340,12 +339,8 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
   
   TXp = np.zeros((3,nyears*12,)+tmax.shape[1:],dtype=np.float)
   TNp = np.zeros((3,nyears*12,)+tmax.shape[1:],dtype=np.float)
-  tminp=np.ones((365,3)+tmin.shape[1:],dtype=np.float)*const.missingval
-  tmaxp=np.ones((365,3)+tmin.shape[1:],dtype=np.float)*const.missingval
   tminpbs=np.ones((byrs,365,3)+tmin.shape[1:],dtype=np.float)*const.missingval
   tmaxpbs=np.ones((byrs,365,3)+tmin.shape[1:],dtype=np.float)*const.missingval
- 
-  
 
   
   if is_thresfile==0:
@@ -397,63 +392,6 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
       print "Method to calculate the thresholds not supported. It must be one of the following: "
       print "bootstrap all_years exclude_year"
       sys.exit("ERROR: No valid threshold method chosen")
-      
-      
-      
-    
-
-    for yr in range(nyears):
-      year=years[0]+yr
-      
-      if version=="all_years":
-        for month in range(1,13):
-          index_ym=yr*12+month-1
-          TNp[0,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminp[months_clim==month,0,:,:],axis=0)
-          TNp[1,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminp[months_clim==month,1,:,:],axis=0)
-          TNp[2,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminp[months_clim==month,2,:,:],axis=0)
-
-          TXp[0,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxp[months_clim==month,0,:,:],axis=0)
-          TXp[1,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxp[months_clim==month,1,:,:],axis=0)
-          TXp[2,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxp[months_clim==month,2,:,:],axis=0)
-      
-      
-      if version in ['bootstrap','exclude_year']: 
-      
-        if (year<bsyear) or (year>beyear):
-          #Out of the base period
-          for month in range(1,13):
-            index_ym=yr*12+month-1
-            #pdb.set_trace()
-            TNp[0,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminp[months_clim==month,0,:,:],axis=0)
-            TNp[1,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminp[months_clim==month,1,:,:],axis=0)
-            TNp[2,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminp[months_clim==month,2,:,:],axis=0)
-          
-            TXp[0,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxp[months_clim==month,0,:,:],axis=0)
-            TXp[1,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxp[months_clim==month,1,:,:],axis=0)
-            TXp[2,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxp[months_clim==month,2,:,:],axis=0)
-        
-        elif (year>=bsyear) and (year<=beyear):
-          #Within the base period
-          for month in range(1,13):
-            index_ym=yr*12+month-1
-            for yr_iter in range(byrs):
-              if yr_iter!=yr:
-                index_ym=yr*12+month-1
-  
-                TNp[0,index_ym,:,:]=TNp[0,index_ym,:,:]+np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminpbs[yr_iter,months_clim==month,0,:,:],axis=0)
-                TNp[1,index_ym,:,:]=TNp[1,index_ym,:,:]+np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminpbs[yr_iter,months_clim==month,1,:,:],axis=0)
-                TNp[2,index_ym,:,:]=TNp[2,index_ym,:,:]+np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminpbs[yr_iter,months_clim==month,2,:,:],axis=0)
-          
-                TXp[0,index_ym,:,:]=TXp[0,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxpbs[yr_iter,months_clim==month,0,:,:],axis=0)
-                TXp[1,index_ym,:,:]=TXp[1,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxpbs[yr_iter,months_clim==month,1,:,:],axis=0)
-                TXp[2,index_ym,:,:]=TXp[2,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxpbs[yr_iter,months_clim==month,2,:,:],axis=0)
-          
-        
-            TNp[:,index_ym,:,:]=TNp[:,index_ym,:,:]/float(byrs-1)                            
-            TXp[:,index_ym,:,:]=TXp[:,index_ym,:,:]/float(byrs-1)
-        
-
-
     
     
   elif is_thresfile==1:
@@ -464,45 +402,82 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
     
     tminpbs=thresfile.variables['tminpbs'][:]
     tmaxpbs=thresfile.variables['tmaxpbs'][:]
-
     thresfile.close()
     
-    for yr in range(nyears):
-      year=years[0]+yr
-      
-      if (year<bsyear) or (year>beyear):
-        #Out of the base period
-        for month in range(1,13):
-          index_ym=yr*12+month-1
-          TNp[0,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminp[months_clim==month,0,:,:],axis=0)
-          TNp[1,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminp[months_clim==month,1,:,:],axis=0)
-          TNp[2,index_ym,:,:]=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminp[months_clim==month,2,:,:],axis=0)
-          
-          TXp[0,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxp[months_clim==month,0,:,:],axis=0)
-          TXp[1,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxp[months_clim==month,1,:,:],axis=0)
-          TXp[2,index_ym,:,:]=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxp[months_clim==month,2,:,:],axis=0)
-        
-      else:
-        #Within the base period
-        for yr_iter in range(byrs):
-          if yr_iter!=yr:
-              TNp[0,index_ym,:,:]=TNp[0,index_ym,:,:]+np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminpbs[yr_iter,months_clim==month,0,:,:],axis=0) #CHECK ALL THIS (THE MONTHS STUFF WILL GIVE AN ERROR! BECAUSE OF THE SIZE)
-              TNp[1,index_ym,:,:]=TNp[1,index_ym,:,:]+np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminpbs[yr_iter,months_clim==month,1,:,:],axis=0)
-              TNp[2,index_ym,:,:]=TNp[2,index_ym,:,:]+np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminpbs[yr_iter,months_clim==month,2,:,:],axis=0)
-          
-              TXp[0,index_ym,:,:]=TXp[0,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxpbs[yr_iter,months_clim==month,0,:,:],axis=0)
-              TXp[1,index_ym,:,:]=TXp[1,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxpbs[yr_iter,months_clim==month,1,:,:],axis=0)
-              TXp[2,index_ym,:,:]=TXp[2,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxpbs[yr_iter,months_clim==month,2,:,:],axis=0)
-          
-        
-        TNp[:,index_ym,:,:]=TNp[:,index_ym,:,:]/float(byrs-1)                    
-        TXp[:,index_ym,:,:]=TX10p[:,index_ym,:,:]/float(byrs-1)
-
 
     
   else:
     sys.exit("ERROR:Wrong entry for is_thresfile (0/1)") 
+    
+  ##
+  if version=="all_years":
+    for yr in range(nyears):
+      year=years[0]+yr
+      for month in range(1,13):
+        index_ym=yr*12+month-1
+        TNp[:,index_ym,:,:],TXp[:,index_ym,:,:]=compare_with_thres(tmin,tmax,tminp,tmaxp,years,months,year,month,bootstrap=False)
+  
+  if version in ['bootstrap','exclude_year']: 
+  
+    for yr in range(nyears):
+      year=years[0]+yr
+      for month in range(1,13):
+        index_ym=yr*12+month-1
+        if (year<bsyear) or (year>beyear):
+          #Out of the base period
+          TNp[:,index_ym,:,:],TXp[:,index_ym,:,:]=compare_with_thres(tmin,tmax,tminp,tmaxp,years,months,year,month,bootstrap=False)
+        else:
+          #Within the base period
+          TNp[:,index_ym,:,:],TXp[:,index_ym,:,:]=compare_with_thres(tmin,tmax,tminpbs,tmaxpbs,years,months,months_clim,year,month,bootstrap=True)
+          
   return TNp,TXp,tminp,tmaxp,tminpbs,tmaxpbs
+###############################################
+###############################################
+
+  
+def compare_with_thres(tmin,tmax,tminth,tmaxth,years,months,year,month,bootstrap):
+  
+  months_clim=months[:365]
+  
+  if bootstrap==False:
+    TN10p=np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminth[months_clim==month,0,:,:],axis=0)
+    TN50p=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminth[months_clim==month,1,:,:],axis=0)
+    TN90p=np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminth[months_clim==month,2,:,:],axis=0)
+    
+    TX10p=np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxth[months_clim==month,0,:,:],axis=0)
+    TX50p=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxth[months_clim==month,1,:,:],axis=0)
+    TX90p=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxth[months_clim==month,2,:,:],axis=0)
+  
+  elif bootstrap==True:
+    for yr_iter in range(byrs):
+      if yr_iter!=yr:
+          TN10p=TN10p+np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminth[yr_iter,months_clim==month,0,:,:],axis=0) #CHECK ALL THIS (THE MONTHS STUFF WILL GIVE AN ERROR! BECAUSE OF THE SIZE)
+          TN50p=TN50p+np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminth[yr_iter,months_clim==month,1,:,:],axis=0)
+          TN90p=TN90p+np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminth[yr_iter,months_clim==month,2,:,:],axis=0)
+             
+          TX10p=TX10p[0,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxth[yr_iter,months_clim==month,0,:,:],axis=0)
+          TX50p=TX50p[1,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxth[yr_iter,months_clim==month,1,:,:],axis=0)
+          TX90p=TX90p[2,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxth[yr_iter,months_clim==month,2,:,:],axis=0)
+    
+    TN10p=TN10p/float(byrs-1)
+    TN50p=TN50p/float(byrs-1)
+    TN90p=TN90p/float(byrs-1)                  
+    TX10p=TX10p/float(byrs-1)
+    TX50p=TX50p/float(byrs-1)
+    TX90p=TX90p/float(byrs-1)
+  
+  
+  TN10p=TN10p*100./float(calendar.monthrange(year, month)[1])
+  TN50p=TN50p*100./float(calendar.monthrange(year, month)[1])
+  TN90p=TN90p*100./float(calendar.monthrange(year, month)[1])
+  
+  TX10p=TX10p*100./float(calendar.monthrange(year, month)[1])
+  TX50p=TX50p*100./float(calendar.monthrange(year, month)[1])
+  TX90p=TX90p*100./float(calendar.monthrange(year, month)[1])
+    
+  return np.concatenate((TN10p[np.newaxis,...],TN50p[np.newaxis,...],TN90p[np.newaxis,...]),axis=0),np.concatenate((TX10p[np.newaxis,...],TX50p[np.newaxis,...],TX90p[np.newaxis,...]),axis=0)
+    
+    
   
 ###############################################
 ###############################################
@@ -536,6 +511,23 @@ def roughly_split(a, n):
   chunks[0,:]=np.array(list( i * k + min(i, m) for i in xrange(n)))
   chunks[1,:]=np.array(list((i + 1) * k + min(i + 1, m) for i in xrange(n)))
   return chunks       
+  
+###############################################
+###############################################
+
+def sel_files_postprocess(filelist,pattern,syear,eyear):
+    years_init=np.array([fname.split(pattern)[1][0:4] for fname in filelist],np.int64)
+    years_end=np.array([fname.split(pattern)[1][5:9] for fname in filelist],np.int64)
+    sel_files=[n for i,n in enumerate(filelist) if  ((years_init[i]<= eyear) & (years_end[i]>= syear))]
+    return sel_files  
+    
+###############################################
+###############################################
+
+def sel_files_awap(filelist,syear,eyear):
+    years=np.array([fname.split(".")[-2][:] for fname in filelist],np.int64)
+    sel_files=[n for i,n in enumerate(filelist) if  ((years[i]<= eyear) & (years[i]>= syear))]
+    return sel_files
 
 ###############################################
 ###############################################
@@ -601,10 +593,9 @@ def write_fileout(ovar,varname,otime,out_file,lat,lon,inputinf):
 def write_thresfile(tminp,tmaxp,tminpbs,tmaxpbs,prec95,prec99,lat,lon,outpath,inputinf):
   
   """
-  Function to write out a netcdf file with the extreme variables
+  Function to write out a netcdf file with the thresholds
 
   """
-  #global tmax10bs,tmax50bs,tmax90bs,tmin10bs,tmin50bs,tmin90bs,tmax10,tmax50,tmax90,tmax10,tmax50,tmax90,prec95,prec99
   print "Writing out thresholds file..." 
   outfile=nc.Dataset("%sthresholds.nc" %(outpath),mode="w")
   outfile.createDimension('time',None)

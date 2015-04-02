@@ -12,6 +12,7 @@ import subprocess as subprocess
 import os.path
 import shutil
 import os
+import ccrc_utils as cu
 
 
 
@@ -23,9 +24,8 @@ Period_names=['1990-2010','2020-2040','2060-2080']
 Domain_names=['d01','d02']
 
 outpath="/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Python/"
-pathin="/srv/ccrc/data13/z3393020/Analyses/NARCliM/ForETCCDI/"
-outpatt="CCRC_NARCliM_DAY_"
-indeck="etccdi.nml.deck"
+inpattern="CCRC_NARCliM_DAY_"
+indeck="etccdi_multifile.nml.deck"
 
 thres_version='bootstrap'
 
@@ -40,14 +40,13 @@ for gind,gname in enumerate(GCM_names):
         
         
         ### LINKING FILES ###
-        fullpathin=str.join("/",[pathin,gname,rname,pname,dname])
-        
-        filename_tx=str.join("",[outpatt,pname,"_tasmax",".nc"])
-        filename_tn=str.join("",[outpatt,pname,"_tasmin",".nc"])
-        filename_pr=str.join("",[outpatt,pname,"_pracc_fl",".nc"])
         
         
-        inpath=fullpathin
+        filename_tx=str.join("",[inpattern,"*","_tasmax",".nc"])
+        filename_tn=str.join("",[inpattern,"*","_tasmin",".nc"])
+        filename_pr=str.join("",[inpattern,"*","_pracc_fl",".nc"])
+        
+        
         outpath=str.join("/",[outpath,gname,rname,pname,dname,"/"])
        
         if not os.path.exists(outpath):
@@ -61,14 +60,17 @@ for gind,gname in enumerate(GCM_names):
           thres_filename=""
         else:
           thres_path=str.join("/",[outpath,gname,rname,"1990-2010",dname])
-          filename=str.join("_",[outpatt,"1990-2009","thresholds.nc"])
+          filename=str.join("_",[outname,"1990-2009","thresholds.nc"])
           thres_filename= "%s/%s" %(thres_path,filename)
           is_thresfile=1
         
+        print cu.get_location(gname,rname,pname,'pp')[0]
         
-        
-        namelist_dic={'%inpath%': inpath,
+        namelist_dic={'%inpath_temp%': str.join("/",[cu.get_location(gname,rname,pname,'pp')[0],dname]),
+                      '%inpath_prec%': str.join("/",[cu.get_location(gname,rname,pname,'flt')[0],dname]),
                       '%outpath%': outpath,
+                      '%inpattern%':  inpattern,
+                      '%data_source%':       "NARCLIM",
                       '%file_prec%': filename_pr,
                       '%file_tmax%': filename_tx,
                       '%file_tmin%': filename_tn,
@@ -97,7 +99,7 @@ for gind,gname in enumerate(GCM_names):
         fin.close()
         fout.close()
         
-        os.system("python ./fclimdex.py -i etccdi_NARCliM.nml")
+        os.system("python ./pyclimdex_multifile.py -i etccdi_NARCliM.nml")
         shutil. copy ( "etccdi_NARCliM.nml" , "./etccdi_%s_%s_%s_%s.nml" %(gname,rname,pname,dname) )
                                           
 

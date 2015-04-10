@@ -9,7 +9,7 @@ data_source="AWAP"
 
 file_prec=rainfall_calib/pre.*.nc
 file_tmax=tmax/tmax.*.nc
-file_tmin=tmax/tmin.*.nc
+file_tmin=tmin/tmin.*.nc
 prec_name=pre
 tmax_name=tmax
 tmin_name=tmin

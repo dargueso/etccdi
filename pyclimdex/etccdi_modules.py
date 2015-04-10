@@ -275,9 +275,10 @@ def calc_R95p(prec,years,inputinf):
     
   elif is_thresfile==1:
     print "Threshold file will be used. No percentiles will be calculated (precip)"
+    print inputinf['thres_filename']
     thresfile=nc.Dataset(inputinf['thres_filename'],'r')
     prec95=thresfile.variables['prec95'][:]
-    prec99=thresfile.variables['prec95'][:]
+    prec99=thresfile.variables['prec99'][:]
     thresfile.close()
     
     
@@ -415,7 +416,7 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
       year=years[0]+yr
       for month in range(1,13):
         index_ym=yr*12+month-1
-        TNp[:,index_ym,:,:],TXp[:,index_ym,:,:]=compare_with_thres(tmin,tmax,tminp,tmaxp,years,months,year,month,bootstrap=False)
+        TNp[:,index_ym,:,:],TXp[:,index_ym,:,:]=compare_with_thres(tmin,tmax,tminp,tmaxp,years,months,year,month,years_base,bootstrap=False)
   
   if version in ['bootstrap','exclude_year']: 
   
@@ -425,19 +426,22 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
         index_ym=yr*12+month-1
         if (year<bsyear) or (year>beyear):
           #Out of the base period
-          TNp[:,index_ym,:,:],TXp[:,index_ym,:,:]=compare_with_thres(tmin,tmax,tminp,tmaxp,years,months,year,month,bootstrap=False)
+          TNp[:,index_ym,:,:],TXp[:,index_ym,:,:]=compare_with_thres(tmin,tmax,tminp,tmaxp,years,months,year,month,years_base,bootstrap=False)
         else:
           #Within the base period
-          TNp[:,index_ym,:,:],TXp[:,index_ym,:,:]=compare_with_thres(tmin,tmax,tminpbs,tmaxpbs,years,months,months_clim,year,month,bootstrap=True)
+          TNp[:,index_ym,:,:],TXp[:,index_ym,:,:]=compare_with_thres(tmin,tmax,tminpbs,tmaxpbs,years,months,year,month,years_base,bootstrap=True)
           
   return TNp,TXp,tminp,tmaxp,tminpbs,tmaxpbs
 ###############################################
 ###############################################
 
   
-def compare_with_thres(tmin,tmax,tminth,tmaxth,years,months,year,month,bootstrap):
+def compare_with_thres(tmin,tmax,tminth,tmaxth,years,months,year,month,years_base,bootstrap):
   
   months_clim=months[:365]
+
+  
+  
   
   if bootstrap==False:
     TN10p=np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminth[months_clim==month,0,:,:],axis=0)
@@ -449,15 +453,25 @@ def compare_with_thres(tmin,tmax,tminth,tmaxth,years,months,year,month,bootstrap
     TX90p=np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxth[months_clim==month,2,:,:],axis=0)
   
   elif bootstrap==True:
+    byrs=years_base[-1]-years_base[0]+1
+    TN10p=np.zeros(tmin.shape[1:],dtype=np.float64)
+    TN50p=np.zeros(tmin.shape[1:],dtype=np.float64)
+    TN90p=np.zeros(tmin.shape[1:],dtype=np.float64)
+    TX10p=np.zeros(tmax.shape[1:],dtype=np.float64)
+    TX50p=np.zeros(tmax.shape[1:],dtype=np.float64)
+    TX90p=np.zeros(tmax.shape[1:],dtype=np.float64)
+    
+    
     for yr_iter in range(byrs):
-      if yr_iter!=yr:
+      
+      if yr_iter!=(year-years_base[0]):
           TN10p=TN10p+np.ma.sum(tmin[(years==year) & (months==month),:,:]<tminth[yr_iter,months_clim==month,0,:,:],axis=0) #CHECK ALL THIS (THE MONTHS STUFF WILL GIVE AN ERROR! BECAUSE OF THE SIZE)
           TN50p=TN50p+np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminth[yr_iter,months_clim==month,1,:,:],axis=0)
           TN90p=TN90p+np.ma.sum(tmin[(years==year) & (months==month),:,:]>tminth[yr_iter,months_clim==month,2,:,:],axis=0)
              
-          TX10p=TX10p[0,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxth[yr_iter,months_clim==month,0,:,:],axis=0)
-          TX50p=TX50p[1,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxth[yr_iter,months_clim==month,1,:,:],axis=0)
-          TX90p=TX90p[2,index_ym,:,:]+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxth[yr_iter,months_clim==month,2,:,:],axis=0)
+          TX10p=TX10p+np.ma.sum(tmax[(years==year) & (months==month),:,:]<tmaxth[yr_iter,months_clim==month,0,:,:],axis=0)
+          TX50p=TX50p+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxth[yr_iter,months_clim==month,1,:,:],axis=0)
+          TX90p=TX90p+np.ma.sum(tmax[(years==year) & (months==month),:,:]>tmaxth[yr_iter,months_clim==month,2,:,:],axis=0)
     
     TN10p=TN10p/float(byrs-1)
     TN50p=TN50p/float(byrs-1)

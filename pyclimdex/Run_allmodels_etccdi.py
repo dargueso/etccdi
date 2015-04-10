@@ -13,17 +13,17 @@ import os.path
 import shutil
 import os
 import ccrc_utils as cu
+import pdb
 
 
-
-GCM_names=['MIROC3.2','CCCMA3.1','ECHAM5','CSIRO-MK30']
+GCM_names=['MIROC3.2','CCCMA3.1','ECHAM5','CSIRO-MK3.0']
 RCM_names=['R1','R2','R3']
 Period_names=['1990-2010','2020-2040','2060-2080']
-#Period_names=['1990-2010']
+#Period_names=['2020-2040']
 
 Domain_names=['d01','d02']
 
-outpath="/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Python/"
+outpath_generic="/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Python/"
 inpattern="CCRC_NARCliM_DAY_"
 indeck="etccdi_multifile.nml.deck"
 
@@ -47,7 +47,7 @@ for gind,gname in enumerate(GCM_names):
         filename_pr=str.join("",[inpattern,"*","_pracc_fl",".nc"])
         
         
-        outpath=str.join("/",[outpath,gname,rname,pname,dname,"/"])
+        outpath=str.join("/",[outpath_generic,gname,rname,pname,dname,"/"])
        
         if not os.path.exists(outpath):
           os.makedirs(outpath)
@@ -59,10 +59,11 @@ for gind,gname in enumerate(GCM_names):
           is_thresfile=0
           thres_filename=""
         else:
-          thres_path=str.join("/",[outpath,gname,rname,"1990-2010",dname])
+          thres_path=str.join("/",[outpath_generic,gname,rname,"1990-2010",dname])
           filename=str.join("_",[outname,"1990-2009","thresholds.nc"])
           thres_filename= "%s/%s" %(thres_path,filename)
           is_thresfile=1
+
         
         print cu.get_location(gname,rname,pname,'pp')[0]
         

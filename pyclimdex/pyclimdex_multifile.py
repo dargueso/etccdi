@@ -97,45 +97,49 @@ if int(inputinf['is_thresfile'])==0:
     years_base = years_input.copy()
     years_base[(years>=bsyear) & ((years<=beyear))] = -999
 
-# #Reduce variable to analysis period
-# prec=prec[(years_input>=syear) & (years_input<=eyear),:,:]
-# 
-# ## Calculate qualitymask for precip
-# prec_mask=em.calc_qualitymask(prec,years,inputinf)
-# 
-# 
-# 
-# R10mm,R20mm,Rnnmm,SDII=em.calc_R10mm(prec,years,float(inputinf['Rnnmm']))
-# 
-# R10mm[prec_mask==True]=const.missingval
-# R20mm[prec_mask==True]=const.missingval
-# Rnnmm[prec_mask==True]=const.missingval
-# SDII[prec_mask==True]=const.missingval
-# 
-# em.write_fileout(R10mm,"R10mm",otime_y,"%s%s.nc"%(fullpathout,"R10mm"),lat,lon,inputinf)
-# em.write_fileout(R20mm,"R20mm",otime_y,"%s%s.nc"%(fullpathout,"R20mm"),lat,lon,inputinf)
-# em.write_fileout(Rnnmm,"Rnnmm",otime_y,"%s%s.nc"%(fullpathout,"Rnnmm"),lat,lon,inputinf)
-# em.write_fileout(SDII ,"SDII",otime_y, "%s%s.nc"%(fullpathout, "SDII"),lat,lon,inputinf)
-# 
-# Rx1day,Rx5day=em.calc_Rx5day(prec,years,months)
-# 
-# Rx1day[prec_mask==True]=const.missingval
-# Rx5day[prec_mask==True]=const.missingval
-# 
-# em.write_fileout(Rx1day,"Rx1day",otime_m,"%s%s.nc"%(fullpathout,"Rx1day"),lat,lon,inputinf)
-# em.write_fileout(Rx5day,"Rx5day",otime_m,"%s%s.nc"%(fullpathout,"Rx5day"),lat,lon,inputinf)
-# 
-# R95p,R99p,PRCPtot,prec95,prec99=em.calc_R95p(prec,years,inputinf)
-# 
-# R95p[prec_mask==True]=const.missingval
-# R99p[prec_mask==True]=const.missingval
-# PRCPtot[prec_mask==True]=const.missingval
-# 
-# em.write_fileout(R95p,"R95p",otime_y,"%s%s.nc"%(fullpathout,"R95p"),lat,lon,inputinf)
-# em.write_fileout(R99p,"R99p",otime_y,"%s%s.nc"%(fullpathout,"R99p"),lat,lon,inputinf)
-# em.write_fileout(PRCPtot,"PRCPtot",otime_y,"%s%s.nc"%(fullpathout,"PRCPtot"),lat,lon,inputinf)
-# 
-# filepr.close()
+#Reduce variable to analysis period
+prec=prec[(years_input>=syear) & (years_input<=eyear),:,:]
+
+## Calculate qualitymask for precip
+if isinstance(prec,np.ma.core.MaskedArray):
+  prec_mask=em.calc_qualitymask(prec,years,inputinf)
+else:
+  prec_mask=np.zeros((eyear-syear+1,)+prec.shape[1:],dtype=np.bool)
+
+
+
+
+R10mm,R20mm,Rnnmm,SDII=em.calc_R10mm(prec,years,float(inputinf['Rnnmm']))
+
+R10mm[prec_mask==True]=const.missingval
+R20mm[prec_mask==True]=const.missingval
+Rnnmm[prec_mask==True]=const.missingval
+SDII[prec_mask==True]=const.missingval
+
+em.write_fileout(R10mm,"R10mm",otime_y,"%s%s.nc"%(fullpathout,"R10mm"),lat,lon,inputinf)
+em.write_fileout(R20mm,"R20mm",otime_y,"%s%s.nc"%(fullpathout,"R20mm"),lat,lon,inputinf)
+em.write_fileout(Rnnmm,"Rnnmm",otime_y,"%s%s.nc"%(fullpathout,"Rnnmm"),lat,lon,inputinf)
+em.write_fileout(SDII ,"SDII",otime_y, "%s%s.nc"%(fullpathout, "SDII"),lat,lon,inputinf)
+
+Rx1day,Rx5day=em.calc_Rx5day(prec,years,months)
+
+Rx1day[prec_mask==True]=const.missingval
+Rx5day[prec_mask==True]=const.missingval
+
+em.write_fileout(Rx1day,"Rx1day",otime_m,"%s%s.nc"%(fullpathout,"Rx1day"),lat,lon,inputinf)
+em.write_fileout(Rx5day,"Rx5day",otime_m,"%s%s.nc"%(fullpathout,"Rx5day"),lat,lon,inputinf)
+
+R95p,R99p,PRCPtot,prec95,prec99=em.calc_R95p(prec,years,inputinf)
+
+R95p[prec_mask==True]=const.missingval
+R99p[prec_mask==True]=const.missingval
+PRCPtot[prec_mask==True]=const.missingval
+
+em.write_fileout(R95p,"R95p",otime_y,"%s%s.nc"%(fullpathout,"R95p"),lat,lon,inputinf)
+em.write_fileout(R99p,"R99p",otime_y,"%s%s.nc"%(fullpathout,"R99p"),lat,lon,inputinf)
+em.write_fileout(PRCPtot,"PRCPtot",otime_y,"%s%s.nc"%(fullpathout,"PRCPtot"),lat,lon,inputinf)
+
+filepr.close()
 ###############################################
 ###############################################
 
@@ -262,8 +266,10 @@ em.write_fileout(DTR,"DTR",otime_m,"%s%s.nc"%(fullpathout,"DTR"),lat,lon,inputin
 
 
 
-
-njobs=10
+if int(inputinf['is_thresfile'])==0:
+  njobs=16
+else:
+  njobs=1
 patches=em.roughly_split(range(tmax.shape[1]),njobs)
 
 

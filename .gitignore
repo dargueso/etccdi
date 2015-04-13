@@ -1,3 +1,5 @@
 input.nml
 ._*
 *.pyc
+*.o
+*.exe

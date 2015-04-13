@@ -3,3 +3,4 @@ input.nml
 *.pyc
 *.o
 *.exe
+*.mod

@@ -1,0 +1,43 @@
+ &input
+OS='linux',
+! OS='windows',
+NoMissingThreshold=0.85,  ! suggested by Lisa
+ipt_dir=  './',
+opt_dir=  '/srv/ccrc/data14/z3393020/NARCliM/ETCCDI//MIROC3.2/R1/2020-2040/d01//',
+
+
+tmax_dir= './tmax.nc',
+tmin_dir= './tmin.nc',
+prcp_dir= './pre.nc',
+
+
+STDSPAN=5,
+BASESYEAR=1990,
+BASEEYEAR=2009,
+PRCPNN=25,
+Outname= 'CCRC_NARCliM',
+
+
+save_thresholds= T,  ! Save the thresholds
+sub_folder=F,   ! put all indices in the same opt_dir
+
+log_file='ETCCDI_MIROC3.2_R1_2020-2040_d01_.log'     ! log file
+
+!RCMs
+is_rcm=T 
+!name of the variables
+tmax_name= 'tasmax'
+tmin_name= 'tasmin'
+prec_name= 'pracc'
+
+
+!name of the coordinates (variables of coordinates within NetCDF)
+
+lon_username='lon'
+lat_username='lat'
+time_username='time'
+
+!threshold file
+is_thresfile= T   !USE thresholds.nc
+
+/

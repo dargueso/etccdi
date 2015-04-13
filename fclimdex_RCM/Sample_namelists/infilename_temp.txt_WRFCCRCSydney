@@ -1,0 +1,3 @@
+  NSTD  BYear EYear PRCPNN         data names for Tmax, Tmin and PRCP              ! data names can be in any order
+   4    1990  1999   25         CCRCSydney_PR_1990-1999.nc  CCRCSydney_TX_1990-1999.nc  CCRCSydney_TN_1990-1999.nc  ! you can separate data names with blanks,
+

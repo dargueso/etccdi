@@ -520,7 +520,7 @@ def calc_thres(varin,byrs):
 
 def roughly_split(a, n):
   "Function to divide a list into roughly equal chunks - to be used in joblib"
-  chunks=np.zeros((2,n))
+  chunks=np.zeros((2,n),dtype=np.int)
   k, m = len(a) / n, len(a) % n
   chunks[0,:]=np.array(list( i * k + min(i, m) for i in xrange(n)))
   chunks[1,:]=np.array(list((i + 1) * k + min(i + 1, m) for i in xrange(n)))
@@ -602,7 +602,8 @@ def write_fileout(ovar,varname,otime,out_file,lat,lon,inputinf):
   
 ###############################################
 ###############################################
-
+###############################################
+###############################################
 
 def write_thresfile(tminp,tmaxp,tminpbs,tmaxpbs,prec95,prec99,lat,lon,outpath,inputinf):
   
@@ -674,3 +675,157 @@ def write_thresfile(tminp,tmaxp,tminpbs,tmaxpbs,prec95,prec99,lat,lon,outpath,in
   setattr(outfile,'comments','Base period: %s-%s' %(inputinf['basesyear'],inputinf['baseeyear']))
   
   outfile.close()
+
+
+###############################################
+###############################################
+
+def create_thresfile(lat,lon,outpath,inputinf):
+  
+  """
+  Function to write out a netcdf file with the thresholds
+
+  """
+  print "Creating thresholds file..." 
+  outfile=nc.Dataset("%sthresholds.nc" %(outpath),mode="w")
+  outfile.createDimension('time',None)
+  outfile.createDimension('DoY',365)
+  outfile.createDimension('perc',3)
+  outfile.createDimension('lat',lat.shape[0])
+  outfile.createDimension('lon',lat.shape[1])
+  
+  outvar_xpbs=outfile.createVariable('tmaxpbs','f4',('time','DoY','perc','lat','lon'),fill_value=const.missingval)
+  outvar_npbs=outfile.createVariable('tminpbs','f4',('time','DoY','perc','lat','lon'),fill_value=const.missingval)
+  
+
+  
+  outvar_x=outfile.createVariable('tmaxp','f4',('DoY','perc','lat','lon'),fill_value=const.missingval)
+  outvar_n=outfile.createVariable('tminp','f4',('DoY','perc','lat','lon'),fill_value=const.missingval) 
+
+  
+  outvar_p95=outfile.createVariable('prec95','f4',('lat','lon'),fill_value=const.missingval)
+  outvar_p99=outfile.createVariable('prec99','f4',('lat','lon'),fill_value=const.missingval)
+  
+  outlat=outfile.createVariable('lat','f4',('lat','lon'),fill_value=const.missingval)
+  outlon=outfile.createVariable('lon','f4',('lat','lon'),fill_value=const.missingval)
+  outtime=outfile.createVariable('time','f4',('time'),fill_value=const.missingval)
+  
+  outlat[:]=lat[:]
+  outlon[:]=lon[:]
+
+  bsyear = int(inputinf['basesyear'])
+  beyear = int(inputinf['baseeyear'])
+  byrs = beyear-bsyear+1
+  
+  otime= [dt.datetime(bsyear+x,06,01,00) for x in range(0,byrs)]
+  outtime[:]=nc.date2num(otime,units='days since %s' %(nc.datetime.strftime(dt.datetime(1949,01,01,00), '%Y-%m-%d %H:%M:%S')),calendar='standard')
+  
+  setattr(outlat,"standard_name","latitude")
+  setattr(outlat,"long_name","latitude")
+  setattr(outlat,"units","degrees_north")
+  setattr(outlat,"axis","Y")
+  
+  setattr(outlon,"standard_name","longitude")
+  setattr(outlon,"long_name","longitude")
+  setattr(outlon,"units","degrees_east")
+  setattr(outlon,"axis","X")
+  
+  setattr(outtime,"standard_name","time")
+  setattr(outtime,"long_name","Time")
+  setattr(outtime,"units","days since %s" %(nc.datetime.strftime(dt.datetime(1949,01,01,00), '%Y-%m-%d %H:%M:%S')))
+  setattr(outtime,"calendar","standard")
+
+  setattr(outfile,'date',dt.date.today().strftime('%Y-%m-%d'))
+  setattr(outfile,'author','Daniel Argueso @CCRC UNSW')
+  setattr(outfile,'contact','d.argueso@unsw.edu.au')
+  setattr(outfile,'comments','Base period: %s-%s' %(inputinf['basesyear'],inputinf['baseeyear']))
+  
+  outfile.close()
+  
+###############################################
+###############################################
+
+def create_fileout(varname,otime,out_file,lat,lon,inputinf):
+  
+  """
+  Function to write out a netcdf file with the extreme variables
+
+  """
+  
+  print "Creating %s file..." %(varname)
+  outfile=nc.Dataset(out_file,mode="w")
+  outfile.createDimension('time',None)
+  outfile.createDimension('lat',lat.shape[0])
+  outfile.createDimension('lon',lat.shape[1])
+  
+  outvar=outfile.createVariable(varname,'f4',('time','lat','lon'),fill_value=const.missingval)
+  outlat=outfile.createVariable('lat','f4',('lat','lon'),fill_value=const.missingval)
+  outlon=outfile.createVariable('lon','f4',('lat','lon'),fill_value=const.missingval)
+  outtime=outfile.createVariable('time','f4',('time'),fill_value=const.missingval)
+  
+  outlat[:]=lat[:]
+  outlon[:]=lon[:]
+
+  outtime[:]=nc.date2num(otime,units='days since %s' %(nc.datetime.strftime(dt.datetime(1949,01,01,00), '%Y-%m-%d %H:%M:%S')),calendar='standard')
+  
+  setattr(outvar,"units",varinfo.get_units(varname))
+  setattr(outvar,"long_name",varinfo.get_longname(varname))
+  if varname=='Rnmm':
+    setattr(outvar,"long_name","Days with rainfall larger than %smm" %(inputinf['Rnmm']))
+  
+  setattr(outlat,"standard_name","latitude")
+  setattr(outlat,"long_name","latitude")
+  setattr(outlat,"units","degrees_north")
+  setattr(outlat,"axis","Y")
+  
+  setattr(outlon,"standard_name","longitude")
+  setattr(outlon,"long_name","longitude")
+  setattr(outlon,"units","degrees_east")
+  setattr(outlon,"axis","X")
+  
+  setattr(outtime,"standard_name","time")
+  setattr(outtime,"long_name","Time")
+  setattr(outtime,"units","days since %s" %(nc.datetime.strftime(dt.datetime(1949,01,01,00), '%Y-%m-%d %H:%M:%S')))
+  setattr(outtime,"calendar","standard")
+
+  setattr(outfile,'date',dt.date.today().strftime('%Y-%m-%d'))
+  setattr(outfile,'author','Daniel Argueso @CCRC UNSW')
+  setattr(outfile,'contact','d.argueso@unsw.edu.au')
+  setattr(outfile,'comments','Base period: %s-%s' %(inputinf['basesyear'],inputinf['baseeyear']))
+  setattr(outfile,'method', 'Method to calculate thresholds: %s' %(inputinf['thres_version']))
+  
+  outfile.close()
+
+###############################################
+###############################################
+
+  
+def put_variable(ovar,varname,ofile,patches):
+  
+  outfile=nc.Dataset(ofile,mode='a')
+  outvar=outfile.variables[varname]
+  outvar[:,patches[0]:patches[1],:]=ovar[:]
+  outfile.close()
+  
+###############################################
+###############################################
+
+def put_variable_thfile(ovar,varname,ofile,patches):
+  if varname in ['tminp','tmaxp']:
+    outfile=nc.Dataset(ofile,mode='a')
+    outvar=outfile.variables[varname]
+    outvar[:,:,patches[0]:patches[1],:]=ovar[:]
+  elif varname in ['tmaxpbs','tminpbs']:
+    outfile=nc.Dataset(ofile,mode='a')
+    outvar=outfile.variables[varname]
+    outvar[:,:,:,patches[0]:patches[1],:]=ovar[:]
+  elif varname in ['prec95','prec99']:
+    outfile=nc.Dataset(ofile,mode='a')
+    outvar=outfile.variables[varname]
+    outvar[patches[0]:patches[1],:]=ovar[:]
+
+    
+    outfile.close()
+
+  
+  

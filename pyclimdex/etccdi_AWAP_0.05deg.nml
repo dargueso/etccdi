@@ -2,7 +2,7 @@
 
 inpath_prec=/home/z3393020/Analyses/AWAP/downloaded/DAILY/
 inpath_temp=/home/z3393020/Analyses/AWAP/downloaded/DAILY/
-outpath=/home/z3393020/Analyses/NARCliM/ETCCDI/AWAP/AWAP_0.05deg_pyclimdex/1990-2009
+outpath=/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Python/AWAP/AWAP_0.05deg/1990-2009/
 inpattern=""
 data_source="AWAP"
 

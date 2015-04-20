@@ -44,8 +44,7 @@ fullpathout="%s/%s%s-%s_" %(inputinf['outpath'],inputinf['outname'],syear,eyear)
 dates,years,months = em.calc_dates(syear,eyear)
 otime_y = em.calc_otime(years,"years")
 otime_m = em.calc_otime(years,"months")
-nsplit=20
-calc_Pext=False
+calc_Pext=True
 calc_Text=True
 
 ###############################################
@@ -197,7 +196,11 @@ if  calc_Text==True:
 
 
   ####### ARRAY IS VERY LARGE - REQUIRES SPLITTING #############
-
+  
+  if int(inputinf['is_thresfile'])==0:
+    nsplit=20
+  else:
+    nsplit=1
   patches=em.roughly_split(range(lat.shape[0]),nsplit)
 
 
@@ -340,7 +343,7 @@ if  calc_Text==True:
     # print "###############################################" 
 
 
-  sfiletx.close()
+  filetx.close()
   filetn.close()
 
 

@@ -23,7 +23,7 @@ Period_names=['1990-2010','2020-2040','2060-2080']
 
 Domain_names=['d01','d02']
 
-outpath_generic="/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Python/"
+outpath_generic="/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Raw/"
 inpattern="CCRC_NARCliM_DAY_"
 indeck="etccdi_multifile.nml.deck"
 

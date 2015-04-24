@@ -1,18 +1,18 @@
 #Namelist for pyclimdex_multifile.py
 
-inpath_prec=/home/z3393020/Analyses/AWAP/OnWRFgrid_NARCliMd02/AWAP-REGRID-WRF-NARClIMd02-DAILY/
-inpath_temp=/home/z3393020/Analyses/AWAP/OnWRFgrid_NARCliMd02/AWAP-REGRID-WRF-NARClIMd02-DAILY/
-outpath=/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Python/AWAP/AWAP_NARCliMgrid/1990-2009/
+inpath_prec=/home/z3393020/Analyses/AWAP/OnWRFgrid_CORDEX/AWAP-REGRID-WRF-CORDEX-DAILY/
+inpath_temp=/home/z3393020/Analyses/AWAP/OnWRFgrid_CORDEX/AWAP-REGRID-WRF-CORDEX-DAILY/
+outpath=/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/AWAP/AWAP_NARCliMgrid/1990-2009/d01/
 inpattern=""
 data_source="AWAP"
 
 
-file_prec=ppt/pre.1990-2009.nc
-file_tmax=tmax/tmax.1990-2009.nc
-file_tmin=tmin/tmin.1990-2009.nc
-prec_name=pre
-tmax_name=tmax
-tmin_name=tmin
+file_prec=ppt/pre.????.nc
+file_tmax=tmax/tmax.????.nc
+file_tmin=tmin/tmin.????.nc
+prec_name=ppt_grid
+tmax_name=tmax_grid
+tmin_name=tmin_grid
 
 lon_username=lon
 lat_username=lat

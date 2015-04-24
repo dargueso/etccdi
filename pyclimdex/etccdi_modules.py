@@ -505,6 +505,7 @@ def calc_thres(varin,byrs):
     varinp=np.ones((365,3)+varin.shape[1:],dtype=np.float64)
     doy_s=np.tile(np.arange(365),byrs)
     use_doy=np.zeros(doy_s.shape,dtype=np.int)
+      
     for d in range(0,365):
       use_doy[:]=1
       init_d=(d-2)%365 
@@ -513,7 +514,15 @@ def calc_thres(varin,byrs):
         use_doy[(doy_s<init_d) & (doy_s>=end_d)]=0
       else:
         use_doy[(doy_s<init_d) | (doy_s>=end_d)]=0
+      
+      # if not isinstance(varin,np.ma.core.MaskedArray):
       varinp[d,:,:,:]=np.asarray(np.percentile(varin[use_doy==1,:,:],[10,50,90],axis=0))
+      # else:
+      #   for i in range(varin.shape[1]):
+      #     for j in range(varin.shape[2]):
+      #       aux=varin[use_doy==1,i,j]
+      #       if len(aux[~aux.mask].data)!=0:
+      #         varinp[d,:,i,j]=np.asarray(np.percentile(aux[~aux.mask].data,[10,50,90]))
       
       
     return varinp

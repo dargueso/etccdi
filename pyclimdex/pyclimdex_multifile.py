@@ -19,6 +19,7 @@ from constants import const
 import sys
 from joblib import Parallel, delayed
 import glob
+import os
 
 import pdb
 
@@ -44,29 +45,40 @@ fullpathout="%s/%s%s-%s_" %(inputinf['outpath'],inputinf['outname'],syear,eyear)
 dates,years,months = em.calc_dates(syear,eyear)
 otime_y = em.calc_otime(years,"years")
 otime_m = em.calc_otime(years,"months")
+single_file=False
 calc_Pext=True
 calc_Text=True
 
 ###############################################
 ###############################################
 
+if not os.path.exists(fullpathout):
+  os.makedirs(fullpathout)
+
+###############################################
+###############################################
+
 # Calculating precipitation extremes ##
 if  calc_Pext==True:
-  print "Loading precipitation files..."
-
-  ifiles_pr_all = sorted(glob.glob("%s/%s"%(inputinf['inpath_prec'],inputinf['file_prec'])))
-
-  if inputinf['data_source']=='NARCLIM':
   
-    ifiles_pr= em.sel_files_postprocess(ifiles_pr_all,inputinf['inpattern'],syear,eyear)
-  elif inputinf['data_source']=='AWAP':
-    ifiles_pr= em.sel_files_awap(ifiles_pr_all,syear,eyear)
+  if single_file:
+    print "Loading precipitation file..."
+    filepr = nc.Dataset("%s/%s"%(inputinf['inpath_prec'],inputinf['file_prec']),"r")
   else:
-    sys.exit('ERROR: Data source not supported for multifile')  
+    print "Loading precipitation files..."
+    ifiles_pr_all = sorted(glob.glob("%s/%s"%(inputinf['inpath_prec'],inputinf['file_prec'])))
 
-  filepr = nc.MFDataset(ifiles_pr)
-  print "Loading precip files between %s and %s" %(syear,eyear)
+    if inputinf['data_source']=='NARCLIM':
+  
+      ifiles_pr= em.sel_files_postprocess(ifiles_pr_all,inputinf['inpattern'],syear,eyear)
+    elif inputinf['data_source']=='AWAP':
+      ifiles_pr= em.sel_files_awap(ifiles_pr_all,syear,eyear)
+    else:
+      sys.exit('ERROR: Data source not supported for multifile')  
 
+    filepr = nc.MFDataset(ifiles_pr)
+    print "Loading precip files between %s and %s" %(syear,eyear)
+    print ifiles_pr
 
   prec = filepr.variables[inputinf['prec_name']][:]
   time = filepr.variables[inputinf['time_username']][:]
@@ -148,28 +160,35 @@ if  calc_Pext==True:
 if  calc_Text==True:
   ## Calculating Temp extremes ##
 
+  if single_file:
+    print "Loading temp files..."
+    filetx = nc.Dataset("%s/%s"%(inputinf['inpath_temp'],inputinf['file_tmax']),"r")
+    filetn = nc.Dataset("%s/%s"%(inputinf['inpath_temp'],inputinf['file_tmin']),"r")
+    
+  else:  
+    print "Loading temp files..."
+    print "%s/%s"%(inputinf['inpath_temp'],inputinf['file_tmax'])
+    ifiles_tx_all = sorted(glob.glob("%s/%s"%(inputinf['inpath_temp'],inputinf['file_tmax'])))
+    ifiles_tn_all = sorted(glob.glob("%s/%s"%(inputinf['inpath_temp'],inputinf['file_tmin'])))
 
-  print "Loading temp files..."
-  print "%s/%s"%(inputinf['inpath_temp'],inputinf['file_tmax'])
-  ifiles_tx_all = sorted(glob.glob("%s/%s"%(inputinf['inpath_temp'],inputinf['file_tmax'])))
-  ifiles_tn_all = sorted(glob.glob("%s/%s"%(inputinf['inpath_temp'],inputinf['file_tmin'])))
-
-  if inputinf['data_source']=='NARCLIM':
-    ifiles_tx=em.sel_files_postprocess(ifiles_tx_all,inputinf['inpattern'],syear,eyear)
-    ifiles_tn=em.sel_files_postprocess(ifiles_tn_all,inputinf['inpattern'],syear,eyear)
-  elif inputinf['data_source']=='AWAP':
-    ifiles_tx=em.sel_files_awap(ifiles_tx_all,syear,eyear)
-    ifiles_tn=em.sel_files_awap(ifiles_tn_all,syear,eyear)
-  else:
-    sys.exit('ERROR: Data source not supported for multifile')
+    if inputinf['data_source']=='NARCLIM':
+      ifiles_tx=em.sel_files_postprocess(ifiles_tx_all,inputinf['inpattern'],syear,eyear)
+      ifiles_tn=em.sel_files_postprocess(ifiles_tn_all,inputinf['inpattern'],syear,eyear)
+    elif inputinf['data_source']=='AWAP':
+      ifiles_tx=em.sel_files_awap(ifiles_tx_all,syear,eyear)
+      ifiles_tn=em.sel_files_awap(ifiles_tn_all,syear,eyear)
+    else:
+      sys.exit('ERROR: Data source not supported for multifile')
 
 
 
-  print "Loading tmax files between %s and %s" %(syear,eyear)
-  filetx=nc.MFDataset(ifiles_tx)
+    print "Loading tmax files between %s and %s" %(syear,eyear)
+    print ifiles_tx
+    filetx=nc.MFDataset(ifiles_tx)
 
-  print "Loading tmin files between %s and %s" %(syear,eyear)
-  filetn=nc.MFDataset(ifiles_tn)
+    print "Loading tmin files between %s and %s" %(syear,eyear)
+    print ifiles_tn
+    filetn=nc.MFDataset(ifiles_tn)
 
   time = filetx.variables[inputinf['time_username']][:]
   lon  = filetx.variables[inputinf['lon_username']][:]
@@ -198,7 +217,7 @@ if  calc_Text==True:
   ####### ARRAY IS VERY LARGE - REQUIRES SPLITTING #############
   
   if int(inputinf['is_thresfile'])==0:
-    nsplit=20
+    nsplit=1
   else:
     nsplit=1
   patches=em.roughly_split(range(lat.shape[0]),nsplit)
@@ -218,10 +237,9 @@ if  calc_Text==True:
     print "###############################################"
   
     tmax = filetx.variables[inputinf['tmax_name']][:,patches[0,p]:patches[1,p],:]
-    tmax_units=filetx.variables[inputinf['tmax_name']].units
-  
+
     tmin = filetn.variables[inputinf['tmin_name']][:,patches[0,p]:patches[1,p],:]
-    tmin_units=filetn.variables[inputinf['tmin_name']].units
+
 
     print "Tmax dimensions are: ", tmax.shape[:]
     print "Tmin dimensions are: ", tmin.shape[:]
@@ -233,12 +251,13 @@ if  calc_Text==True:
     #Reduce variables to analysis period
     tmax=tmax[(years_input>=syear) & (years_input<=eyear),:,:]
     tmin=tmin[(years_input>=syear) & (years_input<=eyear),:,:]
-
+    
     # Convert to Celsius
-    if tmax_units=='K':
+    if hasattr(filetx.variables[inputinf['tmax_name']],'units'):
+      if filetx.variables[inputinf['tmax_name']].units=='K':
         tmax=tmax-const.tkelvin
-
-    if tmin_units=='K':
+    if hasattr(filetn.variables[inputinf['tmin_name']],'units'):
+      if filetn.variables[inputinf['tmin_name']]=='K':
         tmin=tmin-const.tkelvin
 
     ## Calculate qualitymask for tmax, tmin
@@ -281,6 +300,7 @@ if  calc_Text==True:
       tmaxpbs=np.concatenate(tmaxpbs,axis=-1)
   
     else:
+      print "NOT PARALLEL"
       TNp,TXp,tminp,tmaxp,tminpbs,tmaxpbs=em.calc_TX10p(tmax,tmin,dates,inputinf)
   
     ###############################################

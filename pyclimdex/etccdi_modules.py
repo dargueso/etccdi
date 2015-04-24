@@ -317,6 +317,7 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
   beyear = int(inputinf['baseeyear'])
   byrs = beyear-bsyear+1
   version = inputinf['thres_version']
+  missing_vals = inputinf['missing_vals']
   print version
   
   print "Processing TN10p,TN50p,TN90p,TX10p,TX50p,TX90p ..."
@@ -353,8 +354,8 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
       print "A bootstrap will be carried out. This part take most of the time"
     
     
-      tminp=calc_thres(tmin_base,byrs)
-      tmaxp=calc_thres(tmax_base,byrs)
+      tminp=calc_thres(tmin_base,byrs,missing_vals)
+      tmaxp=calc_thres(tmax_base,byrs,missing_vals)
     
       for yr in range(byrs):
         print "year: %s" %(yr+bsyear)
@@ -365,31 +366,31 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
             tmax_boot[years_base==yr+bsyear,:,:]=tmax_boot[years_base==yr_iter+bsyear,:,:]
             tmin_boot[years_base==yr+bsyear,:,:]=tmin_boot[years_base==yr_iter+bsyear,:,:]
       
-          tminpbs[yr,:,:,:,:]=calc_thres(tmin_boot,byrs)
-          tmaxpbs[yr,:,:,:,:]=calc_thres(tmax_boot,byrs)
+          tminpbs[yr,:,:,:,:]=calc_thres(tmin_boot,byrs,missing_vals)
+          tmaxpbs[yr,:,:,:,:]=calc_thres(tmax_boot,byrs,missing_vals)
     
     elif version=='all_years':
       print "No threshold file required. Percentiles will be calculated (temp)"
       print "All years wihtin the base period will be used for all years (no boostrap or other method selected)"
       
-      tminp=calc_thres(tmin_base,byrs)
-      tmaxp=calc_thres(tmax_base,byrs)
+      tminp=calc_thres(tmin_base,byrs,missing_vals)
+      tmaxp=calc_thres(tmax_base,byrs,missing_vals)
       
     elif version=='exclude_year':
       print "No threshold file required. Percentiles will be calculated (temp)"
       print "Each of the base period years will be removed at once and the percentile calculated"
       print "Similar to bootstrap but faster, although not as robust."
       
-      tminp=calc_thres(tmin_base,byrs)
-      tmaxp=calc_thres(tmax_base,byrs)
+      tminp=calc_thres(tmin_base,byrs,missing_vals)
+      tmaxp=calc_thres(tmax_base,byrs,missing_vals)
       
       for yr in range(byrs):
         print "year: %s" %(yr+bsyear)
         tmax_boot=tmax_base[years_base!=yr+bsyear,:,:].copy()
         tmin_boot=tmin_base[years_base!=yr+bsyear,:,:].copy()
         
-        tminpbs[yr,:,:,:,:]=calc_thres(tmin_boot,byrs-1)
-        tmaxpbs[yr,:,:,:,:]=calc_thres(tmax_boot,byrs-1)
+        tminpbs[yr,:,:,:,:]=calc_thres(tmin_boot,byrs-1,missing_vals)
+        tmaxpbs[yr,:,:,:,:]=calc_thres(tmax_boot,byrs-1,missing_vals)
     
     else:
       
@@ -499,7 +500,7 @@ def compare_with_thres(tmin,tmax,tminth,tmaxth,years,months,year,month,years_bas
 ###############################################
 ###############################################
 
-def calc_thres(varin,byrs):
+def calc_thres(varin,byrs,missing_vals):
     
     
     varinp=np.ones((365,3)+varin.shape[1:],dtype=np.float64)
@@ -515,15 +516,18 @@ def calc_thres(varin,byrs):
       else:
         use_doy[(doy_s<init_d) | (doy_s>=end_d)]=0
       
-      # if not isinstance(varin,np.ma.core.MaskedArray):
-      varinp[d,:,:,:]=np.asarray(np.percentile(varin[use_doy==1,:,:],[10,50,90],axis=0))
-      # else:
-      #   for i in range(varin.shape[1]):
-      #     for j in range(varin.shape[2]):
-      #       aux=varin[use_doy==1,i,j]
-      #       if len(aux[~aux.mask].data)!=0:
-      #         varinp[d,:,i,j]=np.asarray(np.percentile(aux[~aux.mask].data,[10,50,90]))
       
+      if missing_vals:
+        if not isinstance(varin,np.ma.core.MaskedArray):
+          varinp[d,:,:,:]=np.asarray(np.percentile(varin[use_doy==1,:,:],[10,50,90],axis=0))
+        else:
+          for i in range(varin.shape[1]):
+            for j in range(varin.shape[2]):
+              aux=varin[use_doy==1,i,j]
+              if len(aux[~aux.mask].data)!=0:
+                varinp[d,:,i,j]=np.asarray(np.percentile(aux[~aux.mask].data,[10,50,90]))
+      else:
+        varinp[d,:,:,:]=np.asarray(np.percentile(varin[use_doy==1,:,:],[10,50,90],axis=0))      
       
     return varinp
         

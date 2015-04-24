@@ -21,6 +21,7 @@ is_thresfile=0
 thres_filename=
 thres_version=bootstrap
 
+missing_vals=False
 NoMissingThreshold=0.85
 stdspan=5
 basesyear=1990

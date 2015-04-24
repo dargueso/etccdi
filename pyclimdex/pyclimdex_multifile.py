@@ -48,6 +48,7 @@ otime_m = em.calc_otime(years,"months")
 single_file=False
 calc_Pext=True
 calc_Text=True
+missing_vals=inputinf['missing_vals']
 
 ###############################################
 ###############################################

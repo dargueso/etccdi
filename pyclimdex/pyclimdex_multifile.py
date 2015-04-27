@@ -41,7 +41,7 @@ nyears=eyear-syear+1
 bsyear = int(inputinf['basesyear'])
 beyear = int(inputinf['baseeyear'])
 byrs = beyear-bsyear+1
-fullpathout="%s/%s%s-%s_" %(inputinf['outpath'],inputinf['outname'],syear,eyear)
+#fullpathout="%s/%s%s-%s_" %(inputinf['outpath'],inputinf['outname'],syear,eyear)
 dates,years,months = em.calc_dates(syear,eyear)
 otime_y = em.calc_otime(years,"years")
 otime_m = em.calc_otime(years,"months")
@@ -53,8 +53,8 @@ missing_vals=inputinf['missing_vals']
 ###############################################
 ###############################################
 
-if not os.path.exists(fullpathout):
-  os.makedirs(fullpathout)
+# if not os.path.exists(fullpathout):
+#   os.makedirs(fullpathout)
 
 ###############################################
 ###############################################

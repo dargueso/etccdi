@@ -218,7 +218,10 @@ if  calc_Text==True:
   ####### ARRAY IS VERY LARGE - REQUIRES SPLITTING #############
   
   if int(inputinf['is_thresfile'])==0:
-    nsplit=1
+    if (lat.shape[0]>300) & (lat.shape[1]>300) & (len(time)>3000):
+      nsplit=20
+    else:
+      nsplit=1
   else:
     nsplit=1
   patches=em.roughly_split(range(lat.shape[0]),nsplit)

@@ -350,10 +350,7 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
   
   if is_thresfile==0:
     if version=='bootstrap':
-      print "No threshold file required. Percentiles will be calculated (temp)"
-      print "A bootstrap will be carried out. This part take most of the time"
-    
-    
+
       tminp=calc_thres(tmin_base,byrs,missing_vals)
       tmaxp=calc_thres(tmax_base,byrs,missing_vals)
     
@@ -370,17 +367,12 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
           tmaxpbs[yr,:,:,:,:]=calc_thres(tmax_boot,byrs,missing_vals)
     
     elif version=='all_years':
-      print "No threshold file required. Percentiles will be calculated (temp)"
-      print "All years wihtin the base period will be used for all years (no boostrap or other method selected)"
-      
+
       tminp=calc_thres(tmin_base,byrs,missing_vals)
       tmaxp=calc_thres(tmax_base,byrs,missing_vals)
       
     elif version=='exclude_year':
-      print "No threshold file required. Percentiles will be calculated (temp)"
-      print "Each of the base period years will be removed at once and the percentile calculated"
-      print "Similar to bootstrap but faster, although not as robust."
-      
+
       tminp=calc_thres(tmin_base,byrs,missing_vals)
       tmaxp=calc_thres(tmax_base,byrs,missing_vals)
       
@@ -400,7 +392,7 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
     
     
   elif is_thresfile==1:
-    print "Threshold file will be used. No percentiles will be calculated (temp)"
+
     thresfile=nc.Dataset(inputinf['thres_filename'],'r')
     tminp=thresfile.variables['tminp'][:]
     tmaxp=thresfile.variables['tmaxp'][:]

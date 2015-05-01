@@ -41,7 +41,7 @@ nyears=eyear-syear+1
 bsyear = int(inputinf['basesyear'])
 beyear = int(inputinf['baseeyear'])
 byrs = beyear-bsyear+1
-#fullpathout="%s/%s%s-%s_" %(inputinf['outpath'],inputinf['outname'],syear,eyear)
+fullpathout="%s/%s%s-%s_" %(inputinf['outpath'],inputinf['outname'],syear,eyear)
 dates,years,months = em.calc_dates(syear,eyear)
 otime_y = em.calc_otime(years,"years")
 otime_m = em.calc_otime(years,"months")
@@ -53,8 +53,8 @@ missing_vals=inputinf['missing_vals']
 ###############################################
 ###############################################
 
-# if not os.path.exists(fullpathout):
-#   os.makedirs(fullpathout)
+if not os.path.exists(inputinf['outpath']):
+   os.makedirs(inputinf['outpath'])
 
 ###############################################
 ###############################################
@@ -232,10 +232,9 @@ if  calc_Text==True:
 
 
 
+
   for p in range(patches.shape[1]):
-    
-    
-    
+  
   
     print "###############################################"  
     print "LOADING PATCH %s : from %s to %s" %(p,patches[0,p],patches[1,p])
@@ -285,20 +284,6 @@ if  calc_Text==True:
       njobs=1
     p_parallel=em.roughly_split(range(lat.shape[1]),njobs)
   
-    ## ONLY FOR THE FIRST PATCH, DISPLAY INFORMATION
-    if p==0:
-      if int(inputinf['is_thresfile'])==0:
-         print "No threshold file required. Percentiles will be calculated (temp)"
-      else:
-        print "Threshold file will be used. No percentiles will be calculated (temp)"
-      
-      if inputinf['thres_version']=='bootstrap':
-        print "A bootstrap will be carried out. This part take most of the time"
-      elif inputinf['thres_version']=='all_years':
-        print "All years wihtin the base period will be used for all years (no boostrap or other method selected)"
-      elif inputinf['thres_version']=='exclude_year':
-        print "Each of the base period years will be removed at once and the percentile calculated"
-        print "Similar to bootstrap but faster, although not as robust."
   
     if njobs>1:
   

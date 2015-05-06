@@ -22,6 +22,8 @@ import pdb
 
 varinfo=vinf.VariablesInfo()
 
+def str2bool(v):
+  return v.lower() in ("true")
 
 def read_input(filename):
   """
@@ -206,8 +208,10 @@ def calc_R10mm(prec,years,Rnnmm_t):
     #Rnnmm
     Rnnmm[yr,:,:]=np.ma.sum(prec[years==year,:,:]>Rnnmm_t,axis=0)
     #SDII
-    prec1mm=np.ma.sum(prec[prec[years==year,:,:]>1.],axis=0)
-    days1mm=np.ma.sum(prec[years==year,:,:]>1.,axis=0)
+    aux=prec[years==year,:,:]
+    aux=np.ma.masked_less(aux,1.)
+    prec1mm=np.ma.sum(aux,axis=0)
+    days1mm=np.sum(~aux.mask,axis=0)
     SDII[yr,:,:]=np.ma.sum(prec1mm,axis=0)/days1mm.astype('float')
     
     
@@ -317,9 +321,8 @@ def calc_TX10p(tmax,tmin,dates,inputinf):
   beyear = int(inputinf['baseeyear'])
   byrs = beyear-bsyear+1
   version = inputinf['thres_version']
-  missing_vals = inputinf['missing_vals']
-  print version
-  
+  missing_vals = str2bool(inputinf['missing_vals'])
+  print missing_vals
   print "Processing TN10p,TN50p,TN90p,TX10p,TX50p,TX90p ..."
   years_all=np.asarray([dates[i].year for i in xrange(len(dates))])
   months_all=np.asarray([dates[i].month for i in xrange(len(dates))])

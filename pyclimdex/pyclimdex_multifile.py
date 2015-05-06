@@ -219,7 +219,7 @@ if  calc_Text==True:
   
   if int(inputinf['is_thresfile'])==0:
     if (lat.shape[0]>300) & (lat.shape[1]>300) & (len(time)>3000):
-      nsplit=20
+      nsplit=1
     else:
       nsplit=1
   else:
@@ -259,9 +259,11 @@ if  calc_Text==True:
     # Convert to Celsius
     if hasattr(filetx.variables[inputinf['tmax_name']],'units'):
       if filetx.variables[inputinf['tmax_name']].units=='K':
+        print "Fixing tmax units to degC"
         tmax=tmax-const.tkelvin
     if hasattr(filetn.variables[inputinf['tmin_name']],'units'):
-      if filetn.variables[inputinf['tmin_name']]=='K':
+      if filetn.variables[inputinf['tmin_name']].units=='K':
+        print "Fixing tmin units to degC"
         tmin=tmin-const.tkelvin
 
     ## Calculate qualitymask for tmax, tmin

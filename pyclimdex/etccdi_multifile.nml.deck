@@ -21,6 +21,7 @@ is_thresfile=%is_thresfile%
 thres_filename=%thres_filename%
 thres_version=%thres_version%
 
+missing_vals=False
 NoMissingThreshold=0.85
 stdspan=5
 basesyear=%basesyear%

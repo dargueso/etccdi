@@ -22,10 +22,26 @@ Period_names=['1990-2010','2020-2040','2060-2080']
 #Period_names=['2020-2040']
 
 Domain_names=['d01','d02']
+data_type='pp'
 
-outpath_generic="/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Raw/"
+
+
 inpattern="CCRC_NARCliM_DAY_"
 indeck="etccdi_multifile.nml.deck"
+
+if data_type=='pp':
+  outpath_generic="/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Raw/"
+  txvarname=tasmax
+  tnvarname=tasmin
+  prvarname=pracc_fl
+  data_type_pr='flt'
+  
+elif data_type=='bc':
+  outpath_generic="/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Bias-corrected/"
+  txvarname=tasmax_bc
+  tnvarname=tasmin_bc
+  prvarname=pracc_bc
+  data_type_pr=data_type
 
 thres_version='bootstrap'
 
@@ -42,9 +58,9 @@ for gind,gname in enumerate(GCM_names):
         ### LINKING FILES ###
         
         
-        filename_tx=str.join("",[inpattern,"*","_tasmax",".nc"])
-        filename_tn=str.join("",[inpattern,"*","_tasmin",".nc"])
-        filename_pr=str.join("",[inpattern,"*","_pracc_fl",".nc"])
+        filename_tx=str.join("",[inpattern,"*",txvarname,".nc"])
+        filename_tn=str.join("",[inpattern,"*",tnvarname,".nc"])
+        filename_pr=str.join("",[inpattern,"*",prvarname,".nc"])
         
         
         outpath=str.join("/",[outpath_generic,gname,rname,pname,dname,"/"])
@@ -65,10 +81,10 @@ for gind,gname in enumerate(GCM_names):
           is_thresfile=1
 
         
-        print cu.get_location(gname,rname,pname,'pp')[0]
+        print cu.get_location(gname,rname,pname,'bc')[0]
         
-        namelist_dic={'%inpath_temp%': str.join("/",[cu.get_location(gname,rname,pname,'pp')[0],dname]),
-                      '%inpath_prec%': str.join("/",[cu.get_location(gname,rname,pname,'flt')[0],dname]),
+        namelist_dic={'%inpath_temp%': str.join("/",[cu.get_location(gname,rname,pname,data_type)[0],dname]),
+                      '%inpath_prec%': str.join("/",[cu.get_location(gname,rname,pname,data_type_pr)[0],dname]),
                       '%outpath%': outpath,
                       '%inpattern%':  inpattern,
                       '%data_source%':       "NARCLIM",
@@ -78,11 +94,11 @@ for gind,gname in enumerate(GCM_names):
                       '%outname%':       outname,
                       '%save_thres%':    str(1),
                       '%log_file%':      log_file,
-                      '%tmax_name%':     "tasmax",
-                      '%tmin_name%':     "tasmin",
-                      '%prec_name%':     "pracc_fl",
+                      '%tmax_name%':     txvarname,
+                      '%tmin_name%':     tnvarname,
+                      '%prec_name%':     prvarname,
                       '%lon_username%':     "lon",
-                      '%lat_username%':     "lon",
+                      '%lat_username%':     "lat",
                       '%time_username%':     "time",
                       '%is_thresfile%':      str(is_thresfile),
                       '%thres_filename%': thres_filename,
@@ -101,7 +117,7 @@ for gind,gname in enumerate(GCM_names):
         fout.close()
         
         os.system("python ./pyclimdex_multifile.py -i etccdi_NARCliM.nml")
-        shutil. copy ( "etccdi_NARCliM.nml" , "./etccdi_%s_%s_%s_%s.nml" %(gname,rname,pname,dname) )
+        #shutil. copy ( "etccdi_NARCliM.nml" , "./etccdi_%s_%s_%s_%s.nml" %(gname,rname,pname,dname) )
                                           
 
 

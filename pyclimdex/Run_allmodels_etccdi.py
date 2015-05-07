@@ -31,16 +31,16 @@ indeck="etccdi_multifile.nml.deck"
 
 if data_type=='pp':
   outpath_generic="/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Raw/"
-  txvarname=tasmax
-  tnvarname=tasmin
-  prvarname=pracc_fl
+  txvarname='tasmax'
+  tnvarname='tasmin'
+  prvarname='pracc_fl'
   data_type_pr='flt'
   
 elif data_type=='bc':
   outpath_generic="/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Bias-corrected/"
-  txvarname=tasmax_bc
-  tnvarname=tasmin_bc
-  prvarname=pracc_bc
+  txvarname='tasmax_bc'
+  tnvarname='tasmin_bc'
+  prvarname='pracc_bc'
   data_type_pr=data_type
 
 thres_version='bootstrap'
@@ -81,7 +81,7 @@ for gind,gname in enumerate(GCM_names):
           is_thresfile=1
 
         
-        print cu.get_location(gname,rname,pname,'bc')[0]
+        print cu.get_location(gname,rname,pname,data_type)[0]
         
         namelist_dic={'%inpath_temp%': str.join("/",[cu.get_location(gname,rname,pname,data_type)[0],dname]),
                       '%inpath_prec%': str.join("/",[cu.get_location(gname,rname,pname,data_type_pr)[0],dname]),

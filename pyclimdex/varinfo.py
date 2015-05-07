@@ -25,18 +25,20 @@ class VariablesInfo(object):
                 'R20mm' :{'units': 'days','long_name':'Days with rainfall larger than 20mm'},
                 'Rnnmm' :{'units': 'days','long_name':''},
                 'SDII' :{'units': 'mm/day','long_name':'Simple precipitaiton intensity index'},
-				'R95p' :{'units': 'mm','long_name':'Accumulated preciptiation from events above the 95th percentile'},
-				'R99p' :{'units': 'mm','long_name':'Accumulated preciptiation from events above the 99th percentile'},
-				'PRCPtot' :{'units': 'mm','long_name':'Total accumulated preciptiation'},
-				'Rx5day':{'units': 'mm','long_name':'5-day maximum accumulated preciptiation'},
-				'Rx1day':{'units': 'mm','long_name':'Daily maximum preciptiation'},
-				'TX10p':{'units': '%','long_name':'Percentage of days tmax below 10th percentile'},
-				'TX50p':{'units': '%','long_name':'Percentage of days tmax above 50th percentile'},
-				'TX90p':{'units': '%','long_name':'Percentage of days tmax above 90th percentile'},
-				'TN10p':{'units': '%','long_name':'Percentage of days tmin below 10th percentile'},
-				'TN50p':{'units': '%','long_name':'Percentage of days tmin above 50th percentile'},
-				'TN90p':{'units': '%','long_name':'Percentage of days tmin above 90th percentile'},
-				
+                'R95p' :{'units': 'mm','long_name':'Accumulated preciptiation from events above the 95th percentile'},
+                'R99p' :{'units': 'mm','long_name':'Accumulated preciptiation from events above the 99th percentile'},
+                'PRCPtot' :{'units': 'mm','long_name':'Total accumulated preciptiation'},
+                'Rx5day':{'units': 'mm','long_name':'5-day maximum accumulated preciptiation'},
+                'Rx1day':{'units': 'mm','long_name':'Daily maximum preciptiation'},
+                'CWD':{'units': 'days','long_name':'Duration of the longest wet spell in a year'},
+                'CDD':{'units': 'days','long_name':'Duration of the longest dry spell in a year'},
+                'TX10p':{'units': '%','long_name':'Percentage of days tmax below 10th percentile'},
+                'TX50p':{'units': '%','long_name':'Percentage of days tmax above 50th percentile'},
+                'TX90p':{'units': '%','long_name':'Percentage of days tmax above 90th percentile'},
+                'TN10p':{'units': '%','long_name':'Percentage of days tmin below 10th percentile'},
+                'TN50p':{'units': '%','long_name':'Percentage of days tmin above 50th percentile'},
+                'TN90p':{'units': '%','long_name':'Percentage of days tmin above 90th percentile'},
+ 
                 }
                 
   def get_var_names(self):

@@ -17,6 +17,7 @@ import varinfo as vinf
 import datetime as dt
 import numpy as np
 import netCDF4 as nc
+from itertools import groupby
 
 import pdb
 
@@ -262,11 +263,13 @@ def calc_R95p(prec,years,inputinf):
   print "Processing R95p, R99p, PRCPtot ..."
   
   nyears=years[-1]-years[0]+1
-  R95p=np.ones((nyears,)+prec.shape[1:],dtype=np.float)*const.missingval
-  R99p=np.ones((nyears,)+prec.shape[1:],dtype=np.float)*const.missingval
-  PRCPtot=np.ones((nyears,)+prec.shape[1:],dtype=np.float)*const.missingval
+  R95p=np.zeros((nyears,)+prec.shape[1:],dtype=np.float)
+  R99p=np.zeros((nyears,)+prec.shape[1:],dtype=np.float)
+  PRCPtot=np.zeros((nyears,)+prec.shape[1:],dtype=np.float)
   prec95=np.ones(prec.shape[1:],dtype=np.float)*const.missingval
   prec99=np.ones(prec.shape[1:],dtype=np.float)*const.missingval
+  
+  prec=prec.filled(0)
   
   if is_thresfile==0:
     print "No threshold file required. Percentiles will be calculated (precip)"
@@ -297,16 +300,70 @@ def calc_R95p(prec,years,inputinf):
 
     for i in range(prec.shape[1]):
       for j in range(prec.shape[2]):
-        aux=prec[years==year,i,j]
-        aux95=aux>prec95[i,j]
-        aux99=aux>prec99[i,j]
-        R95p[yr,i,j] = np.ma.sum(aux[aux95],axis=0)
-        R99p[yr,i,j] = np.ma.sum(aux[aux99],axis=0)
-        PRCPtot[yr,i,j] = np.ma.sum(aux[aux>1.],axis=0)
+        if (prec95[i,j]!=const.missingval) or (prec99[i,j]!=const.missingval):
+          aux=prec[years==year,i,j]
+          aux95=aux>prec95[i,j]
+          aux99=aux>prec99[i,j]
   
+          R95p[yr,i,j] = np.sum(aux[aux95],axis=0)
+          R99p[yr,i,j] = np.sum(aux[aux99],axis=0)
+          PRCPtot[yr,i,j] = np.sum(aux[aux>1.],axis=0)
+          
+          if np.sum(aux95)==0: R95p[yr,i,j] = 0.
+          if np.sum(aux99)==0: R99p[yr,i,j] = 0.
+          
+            
   
     
   return R95p,R99p,PRCPtot,prec95,prec99
+###############################################
+###############################################
+def calc_CWD(prec,years,inputinf):
+  """Function to calculate longest wet and dry spells in a year
+  """
+  
+  CWD=np.zeros((len(years),)+prec.shape[1:],dtype=np.float64)
+  CDD=np.zeros((len(years),)+prec.shape[1:],dtype=np.float64)
+  
+  for i in range(prec.shape[1]):
+    for j in range(prec.shape[2]):
+      wd=1*prec[:,i,j]>1.
+      print len(wd)
+      L=(wd).tolist()
+      srun=np.zeros(wd.shape)
+      srun[1:]=np.diff(wd)
+      if wd[0]==0:srun[0]=-1
+      if wd[0]==1:srun[0]=1
+      
+      groups_w=[]
+      groups_d=[]
+      for k,g in groupby(L):
+        if k==1:
+          b=list(g)
+          groups_w.append(sum(b))
+        if k==0:
+          b=list(g)
+          groups_d.append(len(b))
+          
+      spell_w=np.zeros((len(wd),),dtype=np.int)
+      spell_d=np.zeros((len(wd),),dtype=np.int)
+      
+      if np.any(srun==1):
+        spell_w[srun==1]=np.asarray(groups_w)
+      
+      if np.any(srun==-1):
+        spell_d[srun==-1]=np.asarray(groups_d)
+      
+      for yr in np.unique(years):
+        
+        CWD[yr-years[0],i,j]=np.max(spell_w[years==yr])
+        CDD[yr-years[0],i,j]=np.max(spell_d[years==yr])
+        
+         
+  return CWD,CDD
+  
+  
+  
 ###############################################
 ###############################################
 def calc_TX10p(tmax,tmin,dates,inputinf):

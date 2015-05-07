@@ -20,6 +20,7 @@ import sys
 from joblib import Parallel, delayed
 import glob
 import os
+from datetime import datetime
 
 import pdb
 
@@ -34,6 +35,9 @@ help = "namelist with input arguments", metavar = "namelist")
 
 #####################################
 
+
+start_time = datetime.now()
+
 inputinf=em.read_input(opts.infile)
 syear = int(inputinf['syear'])
 eyear = int(inputinf['eyear'])
@@ -47,7 +51,7 @@ otime_y = em.calc_otime(years,"years")
 otime_m = em.calc_otime(years,"months")
 single_file=False
 calc_Pext=True
-calc_Text=True
+calc_Text=False
 
 
 ###############################################
@@ -128,6 +132,8 @@ if  calc_Pext==True:
 
   R95p,R99p,PRCPtot,prec95,prec99=em.calc_R95p(prec,years,inputinf)
 
+  #CWD,CDD=em.calc_CWD(prec,years,inputinf)
+
   vnamesP={'Rx1day' :Rx1day  ,
           'Rx5day' :Rx5day  , 
           'R10mm'  :R10mm   ,
@@ -136,7 +142,10 @@ if  calc_Pext==True:
           'SDII'   :SDII    ,
           'R95p'   :R95p    ,
           'R99p'   :R99p    ,
-          'PRCPtot':PRCPtot}
+          'PRCPtot':PRCPtot }
+          # 'CWD'    :CWD     ,
+          # 'CDD'    :CDD     }
+
 
   for varext in vnamesP.keys():
     
@@ -368,9 +377,13 @@ if  calc_Text==True:
     # print "FINISHED PATCH %s : from %s to %s" %(i,patches[0,p],patches[1,p])
     # print "###############################################" 
 
-
+    
   filetx.close()
   filetn.close()
+end_time = datetime.now()
+print("#################################")
+print('Duration: {}'.format(end_time - start_time))
+print("#################################")  
 
 
   

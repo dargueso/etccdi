@@ -781,8 +781,8 @@ def create_fileout(varname,otime,out_file,lat,lon,inputinf):
   
   setattr(outvar,"units",varinfo.get_units(varname))
   setattr(outvar,"long_name",varinfo.get_longname(varname))
-  if varname=='Rnmm':
-    setattr(outvar,"long_name","Days with rainfall larger than %smm" %(inputinf['Rnmm']))
+  if varname=='Rnnmm':
+    setattr(outvar,"long_name","Days with rainfall larger than %smm" %(inputinf['Rnnmm']))
   
   setattr(outlat,"standard_name","latitude")
   setattr(outlat,"long_name","latitude")

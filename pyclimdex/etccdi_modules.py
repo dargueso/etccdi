@@ -269,7 +269,8 @@ def calc_R95p(prec,years,inputinf):
   prec95=np.ones(prec.shape[1:],dtype=np.float)*const.missingval
   prec99=np.ones(prec.shape[1:],dtype=np.float)*const.missingval
   
-  prec=prec.filled(0)
+  if isinstance(prec,np.ma.core.MaskedArray):
+    prec=prec.filled(0)
   
   if is_thresfile==0:
     print "No threshold file required. Percentiles will be calculated (precip)"

@@ -51,7 +51,7 @@ otime_y = em.calc_otime(years,"years")
 otime_m = em.calc_otime(years,"months")
 single_file=False
 calc_Pext=True
-calc_Text=False
+calc_Text=True
 
 
 ###############################################

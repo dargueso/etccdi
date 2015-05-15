@@ -213,7 +213,7 @@ def calc_R10mm(prec,years,Rnnmm_t):
     aux=np.ma.masked_less(aux,1.)
     prec1mm=np.ma.sum(aux,axis=0)
     days1mm=np.sum(~aux.mask,axis=0)
-    SDII[yr,:,:]=np.ma.sum(prec1mm,axis=0)/days1mm.astype('float')
+    SDII[yr,:,:]=prec1mm/days1mm.astype('float')
     
     
     

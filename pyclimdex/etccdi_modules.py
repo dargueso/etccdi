@@ -233,14 +233,19 @@ def calc_Rx5day(prec,years,months):
   Rx1day = np.ones((nyears*12,)+prec.shape[1:],dtype=np.float)*const.missingval
   Rx5day = np.ones((nyears*12,)+prec.shape[1:],dtype=np.float)*const.missingval
 
-  prec5day=prec.copy()
-  prec5day[4:,:,:]=prec[4:,:,:]+prec[3:-1,:,:]+prec[2:-2,:,:]+prec[1:-3,:,:]+prec[0:-4,:,:]
+  
+  
+  #prec5day[4:,:,:]=prec[4:,:,:]+prec[3:-1,:,:]+prec[2:-2,:,:]+prec[1:-3,:,:]+prec[0:-4,:,:]
   for yr in range(nyears):
     year=years[0]+yr
     for month in range(1,13):
       index_ym=yr*12+month-1
-      Rx5day[index_ym,:,:] = np.ma.max(prec5day[(years==year) & (months==month),:,:],axis=0)
-      Rx1day[index_ym,:,:] = np.ma.max(prec[(years==year) & (months==month),:,:],axis=0)
+      prec_month=prec[(years==year) & (months==month),:,:]
+      prec5day=prec_month.copy()
+      prec5day[2:-2,:,:]=prec_month[4:,:,:]+prec_month[3:-1,:,:]+prec_month[2:-2,:,:]+prec_month[1:-3,:,:]+prec_month[0:-4,:,:]
+      
+      Rx5day[index_ym,:,:] = np.ma.max(prec5day[:,:,:],axis=0)
+      Rx1day[index_ym,:,:] = np.ma.max(prec_month,axis=0)
       
   return Rx1day,Rx5day
   
@@ -278,7 +283,7 @@ def calc_R95p(prec,years,inputinf):
     for i in range(prec.shape[1]):
       for j in range(prec.shape[2]):
         prec_base=prec[(years>=bsyear) & (years<=beyear),i,j]
-        prec_base_rain=np.ma.masked_less_equal(prec_base,1.)
+        prec_base_rain=np.ma.masked_less(prec_base,1.)
         if np.count_nonzero(~prec_base_rain.mask)!=0:
           prec95[i,j]=np.percentile(prec_base_rain[~prec_base_rain.mask],95,axis=0)
           prec99[i,j]=np.percentile(prec_base_rain[~prec_base_rain.mask],99,axis=0)
@@ -322,14 +327,13 @@ def calc_R95p(prec,years,inputinf):
 def calc_CWD(prec,years,inputinf):
   """Function to calculate longest wet and dry spells in a year
   """
-  
-  CWD=np.zeros((len(years),)+prec.shape[1:],dtype=np.float64)
-  CDD=np.zeros((len(years),)+prec.shape[1:],dtype=np.float64)
+  nyears=years[-1]-years[0]+1
+  CWD=np.zeros((nyears,)+prec.shape[1:],dtype=np.float64)
+  CDD=np.zeros((nyears,)+prec.shape[1:],dtype=np.float64)
   
   for i in range(prec.shape[1]):
     for j in range(prec.shape[2]):
-      wd=1*prec[:,i,j]>1.
-      print len(wd)
+      wd=1*(prec[:,i,j]>=1.)
       L=(wd).tolist()
       srun=np.zeros(wd.shape)
       srun[1:]=np.diff(wd)

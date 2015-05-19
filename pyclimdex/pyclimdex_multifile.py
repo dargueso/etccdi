@@ -132,7 +132,7 @@ if  calc_Pext==True:
 
   R95p,R99p,PRCPtot,prec95,prec99=em.calc_R95p(prec,years,inputinf)
 
-  #CWD,CDD=em.calc_CWD(prec,years,inputinf)
+  CWD,CDD=em.calc_CWD(prec,years,inputinf)
 
   vnamesP={'Rx1day' :Rx1day  ,
           'Rx5day' :Rx5day  , 
@@ -142,9 +142,9 @@ if  calc_Pext==True:
           'SDII'   :SDII    ,
           'R95p'   :R95p    ,
           'R99p'   :R99p    ,
-          'PRCPtot':PRCPtot }
-          # 'CWD'    :CWD     ,
-          # 'CDD'    :CDD     }
+          'PRCPtot':PRCPtot ,
+          'CWD'    :CWD     ,
+          'CDD'    :CDD     }
 
 
   for varext in vnamesP.keys():

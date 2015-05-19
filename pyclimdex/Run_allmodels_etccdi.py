@@ -16,10 +16,13 @@ import ccrc_utils as cu
 import pdb
 
 
+# GCM_names=['NNRP']
+# RCM_names=['R1','R2','R3']
+# Period_names=['1950-2010']#,'2020-2040','2060-2080']
+
 GCM_names=['MIROC3.2','CCCMA3.1','ECHAM5','CSIRO-MK3.0']
 RCM_names=['R1','R2','R3']
 Period_names=['1990-2010','2020-2040','2060-2080']
-
 
 Domain_names=['d01','d02']
 #data_type='bc'
@@ -28,7 +31,7 @@ Domain_names=['d01','d02']
 
 inpattern="CCRC_NARCliM_DAY_"
 indeck="etccdi_multifile.nml.deck"
-for data_type in ['bc','pp']:
+for data_type in ['pp','bc']:
   if data_type=='pp':
     outpath_generic="/srv/ccrc/data14/z3393020/NARCliM/ETCCDI/Raw/"
     txvarname='tasmax'

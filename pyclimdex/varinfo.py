@@ -29,6 +29,7 @@ class VariablesInfo(object):
                 'R99p' :{'units': 'mm','long_name':'Accumulated preciptiation from events above the 99th percentile'},
                 'PRCPtot' :{'units': 'mm','long_name':'Total accumulated preciptiation'},
                 'Rx5day':{'units': 'mm','long_name':'5-day maximum accumulated preciptiation'},
+                'Rx5day_y':{'units': 'mm','long_name':'5-day maximum accumulated preciptiation'},
                 'Rx1day':{'units': 'mm','long_name':'Daily maximum preciptiation'},
                 'CWD':{'units': 'days','long_name':'Duration of the longest wet spell in a year'},
                 'CDD':{'units': 'days','long_name':'Duration of the longest dry spell in a year'},

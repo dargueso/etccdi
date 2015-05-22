@@ -128,14 +128,15 @@ if  calc_Pext==True:
 
   R10mm,R20mm,Rnnmm,SDII=em.calc_R10mm(prec,years,float(inputinf['Rnnmm']))
 
-  Rx1day,Rx5day=em.calc_Rx5day(prec,years,months)
+  Rx1day,Rx5day,Rx5day_y=em.calc_Rx5day(prec,years,months)
 
   R95p,R99p,PRCPtot,prec95,prec99=em.calc_R95p(prec,years,inputinf)
 
   CWD,CDD=em.calc_CWD(prec,years,inputinf)
 
   vnamesP={'Rx1day' :Rx1day  ,
-          'Rx5day' :Rx5day  , 
+          'Rx5day' :Rx5day  ,
+          'Rx5day_y':Rx5day_y  ,
           'R10mm'  :R10mm   ,
           'R20mm'  :R20mm   ,
           'Rnnmm'  :Rnnmm   ,
@@ -144,7 +145,8 @@ if  calc_Pext==True:
           'R99p'   :R99p    ,
           'PRCPtot':PRCPtot ,
           'CWD'    :CWD     ,
-          'CDD'    :CDD     }
+          'CDD'    :CDD     ,
+          }
 
 
   for varext in vnamesP.keys():

@@ -232,7 +232,7 @@ def calc_Rx5day(prec,years,months):
   nyears=years[-1]-years[0]+1
   Rx1day = np.ones((nyears*12,)+prec.shape[1:],dtype=np.float)*const.missingval
   Rx5day = np.ones((nyears*12,)+prec.shape[1:],dtype=np.float)*const.missingval
-
+  Rx5day_y = np.ones((nyears,)+prec.shape[1:],dtype=np.float)*const.missingval
   
   
   #prec5day[4:,:,:]=prec[4:,:,:]+prec[3:-1,:,:]+prec[2:-2,:,:]+prec[1:-3,:,:]+prec[0:-4,:,:]
@@ -246,8 +246,15 @@ def calc_Rx5day(prec,years,months):
       
       Rx5day[index_ym,:,:] = np.ma.max(prec5day[:,:,:],axis=0)
       Rx1day[index_ym,:,:] = np.ma.max(prec_month,axis=0)
+  
+  for yr in range(nyears):
+    year=years[0]+yr
+    prec_y=prec[(years==year),:,:]
+    prec5day_y=prec_y.copy()
+    prec5day_y[2:-2,:,:]=prec_y[4:,:,:]+prec_y[3:-1,:,:]+prec_y[2:-2,:,:]+prec_y[1:-3,:,:]+prec_y[0:-4,:,:]
+    Rx5day_y[yr,:,:] = np.ma.max(prec5day_y[:,:,:],axis=0)
       
-  return Rx1day,Rx5day
+  return Rx1day,Rx5day,Rx5day_y
   
 ###############################################
 ###############################################
@@ -334,22 +341,12 @@ def calc_CWD(prec,years,inputinf):
   for i in range(prec.shape[1]):
     for j in range(prec.shape[2]):
       wd=1*(prec[:,i,j]>=1.)
-
-      if np.any(wd.mask==True):
-        wd[wd.mask]=-99
-          
+      L=(wd).tolist()
       srun=np.zeros(wd.shape)
       srun[1:]=np.diff(wd)
-      srun[srun==99]=-1
-      srun[srun==100]=1
-      
       if wd[0]==0:srun[0]=-1
       if wd[0]==1:srun[0]=1
-
       
-        
-        
-      L=(wd.data).tolist()
       groups_w=[]
       groups_d=[]
       for k,g in groupby(L):
@@ -362,7 +359,7 @@ def calc_CWD(prec,years,inputinf):
           
       spell_w=np.zeros((len(wd),),dtype=np.int)
       spell_d=np.zeros((len(wd),),dtype=np.int)
-      if (len(np.asarray(groups_d))!=len(spell_d[srun==-1])): pdb.set_trace()
+      
       if np.any(srun==1):
         spell_w[srun==1]=np.asarray(groups_w)
       

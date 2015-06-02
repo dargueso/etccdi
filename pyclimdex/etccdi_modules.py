@@ -341,12 +341,22 @@ def calc_CWD(prec,years,inputinf):
   for i in range(prec.shape[1]):
     for j in range(prec.shape[2]):
       wd=1*(prec[:,i,j]>=1.)
-      L=(wd).tolist()
+
+      if np.any(wd.mask==True):
+        wd[wd.mask]=-99
+          
       srun=np.zeros(wd.shape)
       srun[1:]=np.diff(wd)
+      srun[srun==99]=-1
+      srun[srun==100]=1
+      
       if wd[0]==0:srun[0]=-1
       if wd[0]==1:srun[0]=1
+
       
+        
+        
+      L=(wd.data).tolist()
       groups_w=[]
       groups_d=[]
       for k,g in groupby(L):
@@ -359,7 +369,7 @@ def calc_CWD(prec,years,inputinf):
           
       spell_w=np.zeros((len(wd),),dtype=np.int)
       spell_d=np.zeros((len(wd),),dtype=np.int)
-      
+      if (len(np.asarray(groups_d))!=len(spell_d[srun==-1])): pdb.set_trace()
       if np.any(srun==1):
         spell_w[srun==1]=np.asarray(groups_w)
       

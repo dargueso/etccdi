@@ -367,10 +367,11 @@ if  calc_Text==True:
     if int(inputinf['save_thresholds'])==1:
       if p==0:
         em.create_thresfile(lat,lon,fullpathout,inputinf)
-      em.put_variable_thfile(tminp,'tminp',"%sthresholds.nc" %(fullpathout),patches[:,p])
-      em.put_variable_thfile(tminpbs,'tminpbs',"%sthresholds.nc" %(fullpathout),patches[:,p])
-      em.put_variable_thfile(tmaxp,'tmaxp',"%sthresholds.nc" %(fullpathout),patches[:,p])
-      em.put_variable_thfile(tmaxpbs,'tmaxpbs',"%sthresholds.nc" %(fullpathout),patches[:,p])
+      if ('tminp' in locals()) & ('tmaxp' in locals()) & (p==0):  
+        em.put_variable_thfile(tminp,'tminp',"%sthresholds.nc" %(fullpathout),patches[:,p])
+        em.put_variable_thfile(tminpbs,'tminpbs',"%sthresholds.nc" %(fullpathout),patches[:,p])
+        em.put_variable_thfile(tmaxp,'tmaxp',"%sthresholds.nc" %(fullpathout),patches[:,p])
+        em.put_variable_thfile(tmaxpbs,'tmaxpbs',"%sthresholds.nc" %(fullpathout),patches[:,p])
       if ('prec95' in locals()) & ('prec99' in locals()) & (p==0):
         em.put_variable_thfile(prec95,'prec95',"%sthresholds.nc" %(fullpathout))
         em.put_variable_thfile(prec99,'prec99',"%sthresholds.nc" %(fullpathout))
@@ -382,6 +383,13 @@ if  calc_Text==True:
     
   filetx.close()
   filetn.close()
+
+if  calc_Text==False:
+  em.create_thresfile(lat,lon,fullpathout,inputinf)
+  if ('prec95' in locals()) & ('prec99' in locals()):
+    em.put_variable_thfile(prec95,'prec95',"%sthresholds.nc" %(fullpathout))
+    em.put_variable_thfile(prec99,'prec99',"%sthresholds.nc" %(fullpathout))
+    
 end_time = datetime.now()
 print("#################################")
 print('Duration: {}'.format(end_time - start_time))

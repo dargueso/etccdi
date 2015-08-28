@@ -262,7 +262,7 @@ def calc_Rx5day(prec,years,months):
 
 def calc_R95p(prec,years,inputinf):
   """
-   Function to calculate percntile extremes for precipitation (R95p, R99p, PRCPtot)
+   Function to calculate percntile extremes for precipitation (R95p, R99p, PRCPTOT)
 
   """
   
@@ -272,12 +272,12 @@ def calc_R95p(prec,years,inputinf):
   bsyear = int(inputinf['basesyear'])
   beyear = int(inputinf['baseeyear'])
   byrs = beyear-bsyear+1
-  print "Processing R95p, R99p, PRCPtot ..."
+  print "Processing R95p, R99p, PRCPTOT ..."
   
   nyears=years[-1]-years[0]+1
   R95p=np.zeros((nyears,)+prec.shape[1:],dtype=np.float)
   R99p=np.zeros((nyears,)+prec.shape[1:],dtype=np.float)
-  PRCPtot=np.zeros((nyears,)+prec.shape[1:],dtype=np.float)
+  PRCPTOT=np.zeros((nyears,)+prec.shape[1:],dtype=np.float)
   prec95=np.ones(prec.shape[1:],dtype=np.float)*const.missingval
   prec99=np.ones(prec.shape[1:],dtype=np.float)*const.missingval
   
@@ -320,7 +320,7 @@ def calc_R95p(prec,years,inputinf):
   
           R95p[yr,i,j] = np.sum(aux[aux95],axis=0)
           R99p[yr,i,j] = np.sum(aux[aux99],axis=0)
-          PRCPtot[yr,i,j] = np.sum(aux[aux>1.],axis=0)
+          PRCPTOT[yr,i,j] = np.sum(aux[aux>1.],axis=0)
           
           if np.sum(aux95)==0: R95p[yr,i,j] = 0.
           if np.sum(aux99)==0: R99p[yr,i,j] = 0.
@@ -328,7 +328,7 @@ def calc_R95p(prec,years,inputinf):
             
   
     
-  return R95p,R99p,PRCPtot,prec95,prec99
+  return R95p,R99p,PRCPTOT,prec95,prec99
 ###############################################
 ###############################################
 def calc_CWD(prec,years,inputinf):

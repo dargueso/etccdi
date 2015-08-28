@@ -130,7 +130,7 @@ if  calc_Pext==True:
 
   Rx1day,Rx5day,Rx5day_y=em.calc_Rx5day(prec,years,months)
 
-  R95p,R99p,PRCPtot,prec95,prec99=em.calc_R95p(prec,years,inputinf)
+  R95p,R99p,PRCPTOT,prec95,prec99=em.calc_R95p(prec,years,inputinf)
 
   CWD,CDD=em.calc_CWD(prec,years,inputinf)
 
@@ -143,7 +143,7 @@ if  calc_Pext==True:
           'SDII'   :SDII    ,
           'R95p'   :R95p    ,
           'R99p'   :R99p    ,
-          'PRCPtot':PRCPtot ,
+          'PRCPTOT':PRCPTOT ,
           'CWD'    :CWD     ,
           'CDD'    :CDD     ,
           }

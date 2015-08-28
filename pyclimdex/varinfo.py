@@ -27,7 +27,7 @@ class VariablesInfo(object):
                 'SDII' :{'units': 'mm/day','long_name':'Simple precipitaiton intensity index'},
                 'R95p' :{'units': 'mm','long_name':'Accumulated preciptiation from events above the 95th percentile'},
                 'R99p' :{'units': 'mm','long_name':'Accumulated preciptiation from events above the 99th percentile'},
-                'PRCPtot' :{'units': 'mm','long_name':'Total accumulated preciptiation'},
+                'PRCPTOT' :{'units': 'mm','long_name':'Total accumulated preciptiation'},
                 'Rx5day':{'units': 'mm','long_name':'5-day maximum accumulated preciptiation'},
                 'Rx5day_y':{'units': 'mm','long_name':'5-day maximum accumulated preciptiation'},
                 'Rx1day':{'units': 'mm','long_name':'Daily maximum preciptiation'},

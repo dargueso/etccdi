@@ -2,3 +2,6 @@ This projects includes all code to calculate climate extremes defined by the Exp
 (https://www.wcrp-climate.org/etccdi)
 
 Our contribution is the python code with translates exising fortran code for your ease of use.
+You may find the code in pyclimdex.
+
+Any contribution is welcome!
